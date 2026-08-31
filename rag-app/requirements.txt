@@ -4,4 +4,5 @@ langchain-huggingface==0.1.2
 sentence-transformers==3.3.1
 langchain-community==0.3.7
 langchain-chroma==0.1.4
+posthog<4
 python-dotenv==1.0.1

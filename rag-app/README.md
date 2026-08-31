@@ -149,6 +149,11 @@ script. You can also swap in your own document by replacing `data/sample.txt` (o
 
 ## Notes / gotchas
 
+- **"Failed to send telemetry event" warnings.** If you see these, it's a version
+  mismatch between `chromadb` and a too-new `posthog` release (its `capture()` signature
+  changed). `requirements.txt` pins `posthog<4` to avoid this — if it still shows up, run
+  `pip install -r requirements.txt` again to make sure the pin took effect. It's harmless
+  either way and never affects the pipeline's actual output.
 - **Vector store resets on every run.** `rag_pipeline.py` deletes `chroma_db/` before
   rebuilding it, so re-running never duplicates chunks — it's not meant to persist across
   runs of a different document.

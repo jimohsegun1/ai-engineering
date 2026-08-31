@@ -12,6 +12,11 @@ Steps:
 import os
 import shutil
 
+# Opt out of Chroma's anonymous usage telemetry (must be set before chromadb
+# is imported). requirements.txt also pins a compatible `posthog` version,
+# since a too-new posthog release breaks chromadb's telemetry call outright.
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
+
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader
@@ -49,6 +54,8 @@ print(f"[1] Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
 chunks = splitter.split_documents(documents)
 print(f"[2] Split into {len(chunks)} chunks")
+for i, chunk in enumerate(chunks):
+    print(f"    chunk {i} ({len(chunk.page_content)} chars): {chunk.page_content}")
 
 
 # --- Step 3: Create embeddings ---
@@ -78,49 +85,53 @@ print(f"[4] Stored {vector_store._collection.count()} chunks in '{PERSIST_DIRECT
 results = vector_store.similarity_search(QUESTION, k=TOP_K)
 print(f"[5] Top {TOP_K} chunks for: {QUESTION!r}")
 for i, doc in enumerate(results):
-    print(f"    result {i}: {doc.page_content[:100]}...")
+    print(f"    result {i}: {doc.page_content}")
 
 
 # --- Step 6: RAG pipeline ---
 # Wire retrieval + prompt + LLM together: retrieve relevant chunks,
 # inject them as context, and have the LLM generate a grounded answer.
-def format_docs(docs) -> str:
-    return "\n\n".join(doc.page_content for doc in docs)
+#
+# Commented out for now while we build/test steps 1-5, so we don't burn
+# Qorebit credits on every run. Uncomment when ready to test generation.
 
-
-retriever = vector_store.as_retriever(search_kwargs={"k": TOP_K})
-llm = ChatOpenAI(
-    model=CHAT_MODEL,
-    temperature=0,
-    api_key=os.environ["QOREBIT_API_KEY"],
-    base_url=QOREBIT_BASE_URL,
-    default_headers={
-        "HTTP-Referer": "http://localhost",
-        "X-Title": "AI Engineering RAG Learning App",
-        # Qorebit's WAF blocks the openai SDK's default User-Agent string,
-        # so we identify our app instead.
-        "User-Agent": "rag-app-learning-project/1.0",
-    },
-)
-prompt = ChatPromptTemplate.from_template(
-    """Answer the question using only the context below.
-If the context doesn't contain the answer, say you don't know.
-
-Context:
-{context}
-
-Question: {question}
-
-Answer:"""
-)
-
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
-
-answer = rag_chain.invoke(QUESTION)
-print(f"\n[6] Question: {QUESTION}")
-print(f"[6] Answer: {answer}")
+# def format_docs(docs) -> str:
+#     return "\n\n".join(doc.page_content for doc in docs)
+#
+#
+# retriever = vector_store.as_retriever(search_kwargs={"k": TOP_K})
+# llm = ChatOpenAI(
+#     model=CHAT_MODEL,
+#     temperature=0,
+#     api_key=os.environ["QOREBIT_API_KEY"],
+#     base_url=QOREBIT_BASE_URL,
+#     default_headers={
+#         "HTTP-Referer": "http://localhost",
+#         "X-Title": "AI Engineering RAG Learning App",
+#         # Qorebit's WAF blocks the openai SDK's default User-Agent string,
+#         # so we identify our app instead.
+#         "User-Agent": "rag-app-learning-project/1.0",
+#     },
+# )
+# prompt = ChatPromptTemplate.from_template(
+#     """Answer the question using only the context below.
+# If the context doesn't contain the answer, say you don't know.
+#
+# Context:
+# {context}
+#
+# Question: {question}
+#
+# Answer:"""
+# )
+#
+# rag_chain = (
+#     {"context": retriever | format_docs, "question": RunnablePassthrough()}
+#     | prompt
+#     | llm
+#     | StrOutputParser()
+# )
+#
+# answer = rag_chain.invoke(QUESTION)
+# print(f"\n[6] Question: {QUESTION}")
+# print(f"[6] Answer: {answer}")
