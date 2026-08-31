@@ -1,0 +1,13 @@
+Machine Learning Basics
+
+Machine learning is a field of artificial intelligence that gives computers the ability to learn patterns from data without being explicitly programmed for every rule. Instead of writing step-by-step instructions, engineers feed a model examples, and the model adjusts its internal parameters to get better at a task over time.
+
+There are three broad categories of machine learning. Supervised learning trains a model on labeled data, where each input comes with the correct output, such as an email marked as spam or not spam. Unsupervised learning works with unlabeled data and tries to find hidden structure, such as grouping customers into clusters based on purchase behavior. Reinforcement learning trains an agent to make decisions by rewarding good actions and penalizing bad ones, which is common in robotics and game-playing systems.
+
+A typical supervised learning workflow involves collecting data, splitting it into training and test sets, choosing a model architecture, training the model on the training set, and evaluating its performance on the test set. Common evaluation metrics include accuracy, precision, recall, and F1 score, depending on the problem.
+
+Overfitting happens when a model learns the training data too well, including its noise, and performs poorly on new, unseen data. Underfitting happens when a model is too simple to capture the underlying pattern in the data. Techniques like cross-validation, regularization, and gathering more training data help address these problems.
+
+Neural networks are a family of models loosely inspired by the human brain. They consist of layers of connected nodes, or neurons, where each connection has a weight that is adjusted during training. Deep learning refers to neural networks with many layers, which have driven major advances in image recognition, speech recognition, and natural language processing.
+
+Large language models, or LLMs, are a type of deep learning model trained on massive amounts of text to predict the next word in a sequence. This simple training objective, applied at huge scale, results in models that can answer questions, summarize documents, write code, and hold conversations. Retrieval-Augmented Generation, or RAG, is a technique that improves LLM answers by first retrieving relevant chunks of text from an external knowledge base and then giving those chunks to the model as context before it generates a response. This helps the model answer questions about information it was never trained on, such as private company documents.
