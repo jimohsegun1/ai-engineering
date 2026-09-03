@@ -2,6 +2,7 @@ langchain==0.3.7
 langchain-openai==0.2.9
 langchain-huggingface==0.1.2
 sentence-transformers==3.3.1
+transformers==4.46.3
 langchain-community==0.3.7
 langchain-chroma==0.1.4
 posthog<4
