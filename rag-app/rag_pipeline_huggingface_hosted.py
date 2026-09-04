@@ -44,7 +44,7 @@ DOCUMENT_PATH = "data/sample.txt"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = "chroma_db_huggingface_hosted"
+PERSIST_DIRECTORY = "db/huggingface_hosted"
 CHAT_MODEL = "HuggingFaceH4/zephyr-7b-beta"
 TOP_K = 3
 

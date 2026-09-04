@@ -44,7 +44,7 @@ load_dotenv()
 
 DOCUMENT_PATH = "data/sample.md"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = "chroma_db_chunking_markdown"
+PERSIST_DIRECTORY = "db/chunking_markdown"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3

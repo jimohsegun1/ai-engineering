@@ -52,9 +52,9 @@ python chunking_methods/06_code_splitter.py
 
 - **Document loading / chunking**: LangChain (`TextLoader`, `RecursiveCharacterTextSplitter`)
 - **Embeddings**: local, free HuggingFace model (`sentence-transformers/all-MiniLM-L6-v2`) — no API key or cost
-- **Vector database**: Chroma — each file persists to its own folder (`chroma_db/`,
-  `chroma_db_huggingface/`, `chroma_db_huggingface_hosted/`) so running one never clobbers
-  another's store
+- **Vector database**: Chroma — every file persists under `db/`, each to its own
+  subfolder (e.g. `db/qorebit/`, `db/huggingface_local/`, `db/chunking_code/`) so running
+  one never clobbers another's store
 - **LLM (generation)**: Qorebit, a local `flan-t5-base` model, or Hugging Face's hosted
   Inference API — see the table above for which file uses which
 
@@ -79,7 +79,11 @@ rag-app/
 ├── requirements.txt                         # covers every file above
 ├── .env                                     # your real API keys (gitignored, never commit this)
 ├── .env.example                             # template showing which variables to set
-└── chroma_db*/                              # generated per-file, gitignored
+└── db/                                      # generated on every run, gitignored
+    ├── qorebit/                               # from rag_pipeline.py
+    ├── huggingface_local/                     # from rag_pipeline_huggingface.py
+    ├── huggingface_hosted/                    # from rag_pipeline_huggingface_hosted.py
+    └── chunking_<method>/                     # one per chunking_methods/ file
 ```
 
 ## Setup
@@ -209,9 +213,9 @@ in all three files if you want them all to use the same document.
   changed). `requirements.txt` pins `posthog<4` to avoid this — if it still shows up, run
   `pip install -r requirements.txt` again to make sure the pin took effect. It's harmless
   either way and never affects the pipeline's actual output.
-- **Vector store resets on every run.** Both scripts delete their own persisted Chroma
-  folder before rebuilding it, so re-running never duplicates chunks — it's not meant to
-  persist across runs of a different document.
+- **Vector store resets on every run.** Every script deletes its own persisted Chroma
+  folder under `db/` before rebuilding it, so re-running never duplicates chunks — it's not
+  meant to persist across runs of a different document.
 - **Custom headers for Qorebit.** In `rag_pipeline.py`, the `ChatOpenAI` client is
   configured with a custom `User-Agent` header, because Qorebit's WAF blocks the default
   User-Agent string sent by the `openai` Python SDK. `HTTP-Referer` / `X-Title` are also
