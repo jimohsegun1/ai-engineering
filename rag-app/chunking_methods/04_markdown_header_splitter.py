@@ -27,6 +27,7 @@ Steps:
 import os
 import shutil
 import textwrap
+from pathlib import Path
 
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 
@@ -42,9 +43,14 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 load_dotenv()
 
-DOCUMENT_PATH = "data/sample.md"
+# Resolved from this file's own location, not the current working directory,
+# so this script runs correctly whether you're standing in rag-app/ or in
+# rag-app/chunking_methods/ when you run it.
+RAG_APP_DIR = Path(__file__).resolve().parent.parent
+
+DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.md"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = "db/chunking_markdown"
+PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_markdown"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
@@ -70,7 +76,7 @@ def print_passage(label: str, text: str, char_count: int | None = None) -> None:
 
 # --- Step 1: Prepare input document ---
 print_step(1, "Prepare input document")
-loader = TextLoader(DOCUMENT_PATH, encoding="utf-8")
+loader = TextLoader(str(DOCUMENT_PATH), encoding="utf-8")
 documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
@@ -100,7 +106,7 @@ shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
-    persist_directory=PERSIST_DIRECTORY,
+    persist_directory=str(PERSIST_DIRECTORY),
 )
 print(f"Stored {vector_store._collection.count()} chunks in '{PERSIST_DIRECTORY}'")
 

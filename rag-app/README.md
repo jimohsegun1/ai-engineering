@@ -38,7 +38,8 @@ free and uncomment step 6 yourself when you're ready to spend Qorebit credits:
 | `05_semantic_chunker.py` | `SemanticChunker` (langchain-experimental) | `data/sample.txt` | Splits where meaning shifts between sentences, using embeddings rather than a fixed size |
 | `06_code_splitter.py` | `RecursiveCharacterTextSplitter.from_language(PYTHON)` | `data/sample_code.py` | Splits source code along function/class boundaries instead of prose separators |
 
-Run them from the `rag-app/` directory, same as the main pipeline files:
+Every file resolves its input/output paths from its own location, not the current working
+directory, so you can run them either from `rag-app/`:
 ```powershell
 python chunking_methods/01_character_splitter.py
 python chunking_methods/02_recursive_character_splitter.py
@@ -47,6 +48,13 @@ python chunking_methods/04_markdown_header_splitter.py
 python chunking_methods/05_semantic_chunker.py
 python chunking_methods/06_code_splitter.py
 ```
+or from inside `chunking_methods/` itself:
+```powershell
+cd chunking_methods
+python 01_character_splitter.py
+```
+Either way, the venv still needs to be active and `data/`/`db/` are always resolved
+relative to `rag-app/`, never relative to `chunking_methods/`.
 
 ## Stack
 

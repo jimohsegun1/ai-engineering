@@ -21,6 +21,7 @@ import os
 import shutil
 import textwrap
 import time
+from pathlib import Path
 
 from huggingface_hub.errors import HfHubHTTPError
 
@@ -40,11 +41,15 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-DOCUMENT_PATH = "data/sample.txt"
+# Resolved from this file's own location, not the current working directory,
+# so this script runs correctly no matter which directory you run it from.
+RAG_APP_DIR = Path(__file__).resolve().parent
+
+DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = "db/huggingface_hosted"
+PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "huggingface_hosted"
 CHAT_MODEL = "HuggingFaceH4/zephyr-7b-beta"
 TOP_K = 3
 
@@ -70,7 +75,7 @@ def print_passage(label: str, text: str, char_count: int | None = None) -> None:
 # --- Step 1: Prepare input document ---
 # Load the raw text file into LangChain's Document format (text + metadata).
 print_step(1, "Prepare input document")
-loader = TextLoader(DOCUMENT_PATH, encoding="utf-8")
+loader = TextLoader(str(DOCUMENT_PATH), encoding="utf-8")
 documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
@@ -105,7 +110,7 @@ shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
-    persist_directory=PERSIST_DIRECTORY,
+    persist_directory=str(PERSIST_DIRECTORY),
 )
 print(f"Stored {vector_store._collection.count()} chunks in '{PERSIST_DIRECTORY}'")
 
