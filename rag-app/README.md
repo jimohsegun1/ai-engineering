@@ -56,9 +56,24 @@ python 01_character_splitter.py
 Either way, the venv still needs to be active and `data/`/`db/` are always resolved
 relative to `rag-app/`, never relative to `chunking_methods/`.
 
+### PDF input demo
+
+`rag_pipeline_pdf.py` is the same six-step pipeline as `rag_pipeline.py`, but the input
+document is `data/sample.pdf` (a small 3-page PDF about vector databases) instead of a
+`.txt` file, loaded with `PyPDFLoader` instead of `TextLoader`. The key difference to
+notice: `PyPDFLoader` returns **one Document per PDF page** (each carrying a `page` number
+in its metadata) rather than a single Document for the whole file, so step 1 already
+produces multiple documents before chunking even runs — every chunk downstream also keeps
+track of which page it came from. Like the other files, step 6 (the Qorebit call) is
+commented out by default.
+
+```powershell
+python rag_pipeline_pdf.py
+```
+
 ## Stack
 
-- **Document loading / chunking**: LangChain (`TextLoader`, `RecursiveCharacterTextSplitter`)
+- **Document loading / chunking**: LangChain (`TextLoader` or `PyPDFLoader`, `RecursiveCharacterTextSplitter`)
 - **Embeddings**: local, free HuggingFace model (`sentence-transformers/all-MiniLM-L6-v2`) — no API key or cost
 - **Vector database**: Chroma — every file persists under `db/`, each to its own
   subfolder (e.g. `db/qorebit/`, `db/huggingface_local/`, `db/chunking_code/`) so running
@@ -73,7 +88,8 @@ rag-app/
 ├── data/
 │   ├── sample.txt                        # the input document most files use
 │   ├── sample.md                         # same content, restructured with Markdown headers
-│   └── sample_code.py                    # small Python module, for the code-aware splitter
+│   ├── sample_code.py                    # small Python module, for the code-aware splitter
+│   └── sample.pdf                        # small 3-page PDF, for rag_pipeline_pdf.py
 ├── chunking_methods/                     # six chunking-method demos, see table above
 │   ├── 01_character_splitter.py
 │   ├── 02_recursive_character_splitter.py
@@ -84,6 +100,7 @@ rag-app/
 ├── rag_pipeline.py                         # Qorebit version, steps 1-6
 ├── rag_pipeline_huggingface.py             # fully local version, steps 1-6
 ├── rag_pipeline_huggingface_hosted.py      # HF hosted Inference API version, steps 1-6
+├── rag_pipeline_pdf.py                     # PDF input version, steps 1-6
 ├── requirements.txt                         # covers every file above
 ├── .env                                     # your real API keys (gitignored, never commit this)
 ├── .env.example                             # template showing which variables to set
@@ -91,6 +108,7 @@ rag-app/
     ├── qorebit/                               # from rag_pipeline.py
     ├── huggingface_local/                     # from rag_pipeline_huggingface.py
     ├── huggingface_hosted/                    # from rag_pipeline_huggingface_hosted.py
+    ├── pdf/                                   # from rag_pipeline_pdf.py
     └── chunking_<method>/                     # one per chunking_methods/ file
 ```
 

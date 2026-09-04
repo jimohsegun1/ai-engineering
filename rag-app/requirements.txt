@@ -6,5 +6,6 @@ sentence-transformers==3.3.1
 transformers==4.46.3
 langchain-community==0.3.7
 langchain-chroma==0.1.4
+pypdf==6.17.0
 posthog<4
 python-dotenv==1.0.1
