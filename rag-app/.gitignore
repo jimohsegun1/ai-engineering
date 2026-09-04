@@ -1,7 +1,5 @@
 .env
 venv/
 __pycache__/
-chroma_db/
-chroma_db_huggingface/
-chroma_db_huggingface_hosted/
+chroma_db*/
 .claude
