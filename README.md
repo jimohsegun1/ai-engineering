@@ -39,7 +39,7 @@ free and uncomment step 6 yourself when you're ready to spend Qorebit credits:
 | `06_code_splitter.py` | `RecursiveCharacterTextSplitter.from_language(PYTHON)` | `data/sample_code.py` | Splits source code along function/class boundaries instead of prose separators |
 
 Every file resolves its input/output paths from its own location, not the current working
-directory, so you can run them either from `rag-app/`:
+directory, so you can run them either from the project root:
 ```powershell
 python chunking_methods/01_character_splitter.py
 python chunking_methods/02_recursive_character_splitter.py
@@ -54,7 +54,7 @@ cd chunking_methods
 python 01_character_splitter.py
 ```
 Either way, the venv still needs to be active and `data/`/`db/` are always resolved
-relative to `rag-app/`, never relative to `chunking_methods/`.
+relative to the project root, never relative to `chunking_methods/`.
 
 ### PDF input demo
 
@@ -68,7 +68,7 @@ track of which page it came from. Like the other files, step 6 (the Qorebit call
 commented out by default.
 
 ```powershell
-python rag_pipeline_pdf.py
+python rag-app/rag_pipeline_pdf.py
 ```
 
 ## Stack
@@ -83,8 +83,12 @@ python rag_pipeline_pdf.py
 
 ## Project structure
 
+Shared resources (`data/`, `db/`, `venv/`, config files) live at the project root, so any
+future learning module in this repo can reuse them too. `rag-app/` holds only the four
+pipeline files themselves.
+
 ```
-rag-app/
+ai-engineering/                             # project root
 ├── data/
 │   ├── sample.txt                        # the input document most files use
 │   ├── sample.md                         # same content, restructured with Markdown headers
@@ -97,10 +101,11 @@ rag-app/
 │   ├── 04_markdown_header_splitter.py
 │   ├── 05_semantic_chunker.py
 │   └── 06_code_splitter.py
-├── rag_pipeline.py                         # Qorebit version, steps 1-6
-├── rag_pipeline_huggingface.py             # fully local version, steps 1-6
-├── rag_pipeline_huggingface_hosted.py      # HF hosted Inference API version, steps 1-6
-├── rag_pipeline_pdf.py                     # PDF input version, steps 1-6
+├── rag-app/
+│   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
+│   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
+│   ├── rag_pipeline_huggingface_hosted.py  # HF hosted Inference API version, steps 1-6
+│   └── rag_pipeline_pdf.py                 # PDF input version, steps 1-6
 ├── requirements.txt                         # covers every file above
 ├── .env                                     # your real API keys (gitignored, never commit this)
 ├── .env.example                             # template showing which variables to set
@@ -116,16 +121,17 @@ rag-app/
 
 ### 1. Open a terminal in the project folder
 
-Navigate to `rag-app/` — every command below assumes you're standing in this directory.
+Navigate to the project root — every command below assumes you're standing in this
+directory (not inside `rag-app/` or `chunking_methods/`).
 
 **PowerShell:**
 ```powershell
-cd C:\Users\jimoh\OneDrive\Desktop\OFFICE\ai-engineering\rag-app
+cd C:\Users\jimoh\OneDrive\Desktop\OFFICE\ai-engineering
 ```
 
 **Git Bash:**
 ```bash
-cd /c/Users/jimoh/OneDrive/Desktop/OFFICE/ai-engineering/rag-app
+cd /c/Users/jimoh/OneDrive/Desktop/OFFICE/ai-engineering
 ```
 
 ### 2. Create the virtual environment
@@ -207,12 +213,13 @@ only placeholders and is safe to commit.
 ## Running it
 
 Make sure your virtual environment is activated (prompt shows `(venv)`) and you're in the
-`rag-app/` directory, then run whichever version you want:
+project root, then run whichever version you want:
 
 ```powershell
-python rag_pipeline.py                          # Qorebit — needs QOREBIT_API_KEY in .env
-python rag_pipeline_huggingface.py              # fully local — no setup needed beyond step 4
-python rag_pipeline_huggingface_hosted.py       # HF hosted API — needs HUGGINGFACEHUB_API_TOKEN in .env
+python rag-app/rag_pipeline.py                          # Qorebit — needs QOREBIT_API_KEY in .env
+python rag-app/rag_pipeline_huggingface.py              # fully local — no setup needed beyond step 4
+python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — needs HUGGINGFACEHUB_API_TOKEN in .env
+python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
 ```
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's

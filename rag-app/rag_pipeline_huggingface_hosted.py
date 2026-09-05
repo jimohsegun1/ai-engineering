@@ -37,13 +37,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample.txt"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "huggingface_hosted"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "huggingface_hosted"
 CHAT_MODEL = "HuggingFaceH4/zephyr-7b-beta"
 TOP_K = 3
 

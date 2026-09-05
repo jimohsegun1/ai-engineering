@@ -1,8 +1,11 @@
-"""RAG chunking method: RecursiveCharacterTextSplitter.
+"""RAG chunking method: MarkdownHeaderTextSplitter.
 
-Falls back through smaller separators (paragraph, line, sentence, word)
-to keep splitting an oversized chunk down, unlike 01_character_splitter.py.
-The general-purpose default, and what rag_pipeline.py uses too.
+Splits along Markdown headers (#, ##, ...) instead of by size, keeping
+each section together and recording the heading path as metadata on
+every chunk. Uses data/sample.md instead of the plain .txt file.
+
+Unlike the other splitters here, it operates on raw text (`.split_text()`)
+rather than loaded Documents (`.split_documents()`).
 """
 
 import os
@@ -20,18 +23,16 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample.md"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_recursive"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "chunking_markdown"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
@@ -62,13 +63,15 @@ documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
-# --- Step 2: Chunking (RecursiveCharacterTextSplitter) ---
-print_step(2, "Chunking (RecursiveCharacterTextSplitter)")
-splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-chunks = splitter.split_documents(documents)
+# --- Step 2: Chunking (MarkdownHeaderTextSplitter) ---
+print_step(2, "Chunking (MarkdownHeaderTextSplitter)")
+headers_to_split_on = [("#", "h1"), ("##", "h2")]
+splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+chunks = splitter.split_text(documents[0].page_content)
 print(f"Split into {len(chunks)} chunks")
 for i, chunk in enumerate(chunks, start=1):
-    print_passage(f"Chunk {i}/{len(chunks)}", chunk.page_content, len(chunk.page_content))
+    heading = " > ".join(chunk.metadata.values())
+    print_passage(f"Chunk {i}/{len(chunks)} [{heading}]", chunk.page_content, len(chunk.page_content))
 
 
 # --- Step 3: Create embeddings ---
@@ -94,7 +97,8 @@ results = vector_store.similarity_search(QUESTION, k=TOP_K)
 print(f"Query: {QUESTION!r}")
 print(f"Top {TOP_K} matching chunks:")
 for i, doc in enumerate(results, start=1):
-    print_passage(f"Result {i}/{TOP_K}", doc.page_content)
+    heading = " > ".join(doc.metadata.values())
+    print_passage(f"Result {i}/{TOP_K} [{heading}]", doc.page_content)
 
 
 # --- Step 6: RAG pipeline ---

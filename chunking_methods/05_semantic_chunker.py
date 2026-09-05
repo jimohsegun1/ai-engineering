@@ -1,11 +1,9 @@
-"""RAG chunking method: MarkdownHeaderTextSplitter.
+"""RAG chunking method: SemanticChunker (langchain-experimental).
 
-Splits along Markdown headers (#, ##, ...) instead of by size, keeping
-each section together and recording the heading path as metadata on
-every chunk. Uses data/sample.md instead of the plain .txt file.
-
-Unlike the other splitters here, it operates on raw text (`.split_text()`)
-rather than loaded Documents (`.split_documents()`).
+Embeds each sentence and cuts a new chunk wherever meaning shifts
+sharply between consecutive sentences, instead of splitting by a fixed
+size. This needs an embedding model *during* chunking, so step 2 below
+creates it early (normally step 3's job); step 3 just reuses it.
 """
 
 import os
@@ -21,18 +19,18 @@ from langchain_community.document_loaders import TextLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
+from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.md"
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample.txt"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_markdown"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "chunking_semantic"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
@@ -63,26 +61,31 @@ documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
-# --- Step 2: Chunking (MarkdownHeaderTextSplitter) ---
-print_step(2, "Chunking (MarkdownHeaderTextSplitter)")
-headers_to_split_on = [("#", "h1"), ("##", "h2")]
-splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
-chunks = splitter.split_text(documents[0].page_content)
+# --- Step 2: Chunking (SemanticChunker) ---
+print_step(2, "Chunking (SemanticChunker)")
+embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+# Default threshold (95th percentile) is tuned for long documents and
+# collapses our short sample into one giant chunk; 50 works better here.
+splitter = SemanticChunker(
+    embeddings,
+    breakpoint_threshold_type="percentile",
+    breakpoint_threshold_amount=50,
+)
+chunks = [c for c in splitter.split_documents(documents) if c.page_content.strip()]  # can emit an empty trailing chunk
 print(f"Split into {len(chunks)} chunks")
 for i, chunk in enumerate(chunks, start=1):
-    heading = " > ".join(chunk.metadata.values())
-    print_passage(f"Chunk {i}/{len(chunks)} [{heading}]", chunk.page_content, len(chunk.page_content))
+    print_passage(f"Chunk {i}/{len(chunks)}", chunk.page_content, len(chunk.page_content))
 
 
 # --- Step 3: Create embeddings ---
+# Already created above (step 2 needed it) — reusing the same model here.
 print_step(3, "Create embeddings")
-embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-print(f"Loaded embedding model: {EMBEDDING_MODEL}")
+print(f"Reusing embedding model already loaded in step 2: {EMBEDDING_MODEL}")
 
 
 # --- Step 4: Store embeddings in vector database ---
 print_step(4, "Store embeddings in vector database")
-shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
+shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)  # avoid duplicating chunks on rerun
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
@@ -97,8 +100,7 @@ results = vector_store.similarity_search(QUESTION, k=TOP_K)
 print(f"Query: {QUESTION!r}")
 print(f"Top {TOP_K} matching chunks:")
 for i, doc in enumerate(results, start=1):
-    heading = " > ".join(doc.metadata.values())
-    print_passage(f"Result {i}/{TOP_K} [{heading}]", doc.page_content)
+    print_passage(f"Result {i}/{TOP_K}", doc.page_content)
 
 
 # --- Step 6: RAG pipeline ---

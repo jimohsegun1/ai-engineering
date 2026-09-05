@@ -1,9 +1,9 @@
-"""RAG chunking method: SemanticChunker (langchain-experimental).
+"""RAG chunking method: CharacterTextSplitter (fixed-size, single separator).
 
-Embeds each sentence and cuts a new chunk wherever meaning shifts
-sharply between consecutive sentences, instead of splitting by a fixed
-size. This needs an embedding model *during* chunking, so step 2 below
-creates it early (normally step 3's job); step 3 just reuses it.
+Splits only on one separator (a blank line here) and does NOT split an
+oversized paragraph further, so chunks can end up larger than chunk_size.
+Compare with 02_recursive_character_splitter.py, which falls back to
+smaller separators to avoid that.
 """
 
 import os
@@ -19,18 +19,20 @@ from langchain_community.document_loaders import TextLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
+from langchain_text_splitters import CharacterTextSplitter
 
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample.txt"
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_semantic"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "chunking_character"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
@@ -61,31 +63,28 @@ documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
-# --- Step 2: Chunking (SemanticChunker) ---
-print_step(2, "Chunking (SemanticChunker)")
-embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-# Default threshold (95th percentile) is tuned for long documents and
-# collapses our short sample into one giant chunk; 50 works better here.
-splitter = SemanticChunker(
-    embeddings,
-    breakpoint_threshold_type="percentile",
-    breakpoint_threshold_amount=50,
+# --- Step 2: Chunking (CharacterTextSplitter) ---
+print_step(2, "Chunking (CharacterTextSplitter)")
+splitter = CharacterTextSplitter(
+    separator="\n\n",
+    chunk_size=CHUNK_SIZE,
+    chunk_overlap=CHUNK_OVERLAP,
 )
-chunks = [c for c in splitter.split_documents(documents) if c.page_content.strip()]  # can emit an empty trailing chunk
+chunks = splitter.split_documents(documents)
 print(f"Split into {len(chunks)} chunks")
 for i, chunk in enumerate(chunks, start=1):
     print_passage(f"Chunk {i}/{len(chunks)}", chunk.page_content, len(chunk.page_content))
 
 
 # --- Step 3: Create embeddings ---
-# Already created above (step 2 needed it) — reusing the same model here.
 print_step(3, "Create embeddings")
-print(f"Reusing embedding model already loaded in step 2: {EMBEDDING_MODEL}")
+embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+print(f"Loaded embedding model: {EMBEDDING_MODEL}")
 
 
 # --- Step 4: Store embeddings in vector database ---
 print_step(4, "Store embeddings in vector database")
-shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)  # avoid duplicating chunks on rerun
+shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,

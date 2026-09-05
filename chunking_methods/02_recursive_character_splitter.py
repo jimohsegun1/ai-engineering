@@ -1,8 +1,8 @@
-"""RAG chunking method: TokenTextSplitter.
+"""RAG chunking method: RecursiveCharacterTextSplitter.
 
-Sizes chunks by token count (via tiktoken) instead of character count,
-lining up with the token-based limits embedding models and LLMs
-actually have.
+Falls back through smaller separators (paragraph, line, sentence, word)
+to keep splitting an oversized chunk down, unlike 01_character_splitter.py.
+The general-purpose default, and what rag_pipeline.py uses too.
 """
 
 import os
@@ -20,18 +20,18 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain_text_splitters import TokenTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
-CHUNK_SIZE_TOKENS = 100
-CHUNK_OVERLAP_TOKENS = 20
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample.txt"
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_token"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "chunking_recursive"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
@@ -62,12 +62,11 @@ documents = loader.load()
 print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
-# --- Step 2: Chunking (TokenTextSplitter) ---
-# chunk_size/chunk_overlap here are counted in tokens, not characters.
-print_step(2, "Chunking (TokenTextSplitter)")
-splitter = TokenTextSplitter(chunk_size=CHUNK_SIZE_TOKENS, chunk_overlap=CHUNK_OVERLAP_TOKENS)
+# --- Step 2: Chunking (RecursiveCharacterTextSplitter) ---
+print_step(2, "Chunking (RecursiveCharacterTextSplitter)")
+splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
 chunks = splitter.split_documents(documents)
-print(f"Split into {len(chunks)} chunks (~{CHUNK_SIZE_TOKENS} tokens each)")
+print(f"Split into {len(chunks)} chunks")
 for i, chunk in enumerate(chunks, start=1):
     print_passage(f"Chunk {i}/{len(chunks)}", chunk.page_content, len(chunk.page_content))
 

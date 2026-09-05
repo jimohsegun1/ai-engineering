@@ -25,13 +25,13 @@ from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 load_dotenv()
 
 # Resolved from this file's location so it works from any working directory.
-RAG_APP_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample_code.py"
+DOCUMENT_PATH = PROJECT_ROOT / "data" / "sample_code.py"
 CHUNK_SIZE = 300
 CHUNK_OVERLAP = 30
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PERSIST_DIRECTORY = RAG_APP_DIR / "db" / "chunking_code"
+PERSIST_DIRECTORY = PROJECT_ROOT / "db" / "chunking_code"
 QOREBIT_BASE_URL = "https://api.qorebit.ai/v1"
 CHAT_MODEL = "openai/gpt-4o"
 TOP_K = 3
