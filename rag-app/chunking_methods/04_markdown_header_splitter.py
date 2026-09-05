@@ -1,27 +1,11 @@
 """RAG chunking method: MarkdownHeaderTextSplitter.
 
 Splits along Markdown headers (#, ##, ...) instead of by size, keeping
-each section together and recording the heading path (e.g. h1/h2) as
-metadata on every chunk. This uses data/sample.md — the same content as
-data/sample.txt, restructured with Markdown headings — instead of the
-plain .txt file the other chunking methods use.
+each section together and recording the heading path as metadata on
+every chunk. Uses data/sample.md instead of the plain .txt file.
 
-Note: MarkdownHeaderTextSplitter operates on raw text (`.split_text()`),
-not on loaded Document objects (`.split_documents()`) like the other
-splitters in this folder — one of the ways this method's API differs.
-
-In practice, a header-based split is often followed by a second,
-size-bounding pass (e.g. RecursiveCharacterTextSplitter) if any section
-turns out too long — skipped here to keep this demo focused on the
-header-splitting behavior itself.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- MarkdownHeaderTextSplitter
-3. Create embeddings
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
+Unlike the other splitters here, it operates on raw text (`.split_text()`)
+rather than loaded Documents (`.split_documents()`).
 """
 
 import os
@@ -43,9 +27,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.md"
@@ -82,8 +64,6 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking (MarkdownHeaderTextSplitter) ---
-# Splits on "#" and "##" headers, keeping each section's text together
-# and storing the heading path as metadata (e.g. {"h1": "...", "h2": "..."}).
 print_step(2, "Chunking (MarkdownHeaderTextSplitter)")
 headers_to_split_on = [("#", "h1"), ("##", "h2")]
 splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)

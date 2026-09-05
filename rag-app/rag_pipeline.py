@@ -14,9 +14,7 @@ import shutil
 import textwrap
 from pathlib import Path
 
-# Opt out of Chroma's anonymous usage telemetry (must be set before chromadb
-# is imported). requirements.txt also pins a compatible `posthog` version,
-# since a too-new posthog release breaks chromadb's telemetry call outright.
+# Must be set before chromadb is imported.
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 
 from dotenv import load_dotenv
@@ -31,8 +29,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly no matter which directory you run it from.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
@@ -64,7 +61,6 @@ def print_passage(label: str, text: str, char_count: int | None = None) -> None:
 
 
 # --- Step 1: Prepare input document ---
-# Load the raw text file into LangChain's Document format (text + metadata).
 print_step(1, "Prepare input document")
 loader = TextLoader(str(DOCUMENT_PATH), encoding="utf-8")
 documents = loader.load()
@@ -72,8 +68,6 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking ---
-# Split the document into overlapping chunks so retrieval can return
-# focused passages instead of the whole file.
 print_step(2, "Chunking")
 splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
 chunks = splitter.split_documents(documents)
@@ -83,21 +77,15 @@ for i, chunk in enumerate(chunks, start=1):
 
 
 # --- Step 3: Create embeddings ---
-# An embedding model turns text into a vector of numbers that captures
-# meaning, so similar text ends up with similar vectors. This uses a
-# free local model since Qorebit's docs only cover chat completions.
+# Free local model — Qorebit's API doesn't cover embeddings.
 print_step(3, "Create embeddings")
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 print(f"Loaded embedding model: {EMBEDDING_MODEL}")
 
 
 # --- Step 4: Store embeddings in vector database ---
-# Chroma embeds every chunk and stores the vectors (plus original text)
-# on disk so they can be searched later without re-embedding. We wipe
-# any previous run's data first so re-running this script doesn't keep
-# appending duplicate chunks to the same collection.
 print_step(4, "Store embeddings in vector database")
-shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
+shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)  # avoid duplicating chunks on rerun
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
@@ -107,7 +95,6 @@ print(f"Stored {vector_store._collection.count()} chunks in '{PERSIST_DIRECTORY}
 
 
 # --- Step 5: Similarity search ---
-# Embed the query and ask the vector database for the closest chunks.
 print_step(5, "Similarity search")
 results = vector_store.similarity_search(QUESTION, k=TOP_K)
 print(f"Query: {QUESTION!r}")
@@ -117,11 +104,7 @@ for i, doc in enumerate(results, start=1):
 
 
 # --- Step 6: RAG pipeline ---
-# Wire retrieval + prompt + LLM together: retrieve relevant chunks,
-# inject them as context, and have the LLM generate a grounded answer.
-#
-# Commented out for now while we build/test steps 1-5, so we don't burn
-# Qorebit credits on every run. Uncomment when ready to test generation.
+# Commented out to avoid burning Qorebit credits; uncomment when ready.
 
 # def format_docs(docs) -> str:
 #     return "\n\n".join(doc.page_content for doc in docs)
@@ -136,9 +119,7 @@ for i, doc in enumerate(results, start=1):
 #     default_headers={
 #         "HTTP-Referer": "http://localhost",
 #         "X-Title": "AI Engineering RAG Learning App",
-#         # Qorebit's WAF blocks the openai SDK's default User-Agent string,
-#         # so we identify our app instead.
-#         "User-Agent": "rag-app-learning-project/1.0",
+#         "User-Agent": "rag-app-learning-project/1.0",  # Qorebit's WAF blocks the default one
 #     },
 # )
 # prompt = ChatPromptTemplate.from_template(

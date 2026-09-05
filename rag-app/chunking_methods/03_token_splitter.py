@@ -1,18 +1,8 @@
 """RAG chunking method: TokenTextSplitter.
 
-Sizes chunks by token count (via tiktoken) instead of character count.
-This matters because embedding models and LLMs have limits measured in
-tokens, not characters, and a token is often ~4 characters of English
-text — so token-based sizing lines up more directly with what the
-model actually "sees" and its context-window limits.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- TokenTextSplitter
-3. Create embeddings
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
+Sizes chunks by token count (via tiktoken) instead of character count,
+lining up with the token-based limits embedding models and LLMs
+actually have.
 """
 
 import os
@@ -34,9 +24,7 @@ from langchain_text_splitters import TokenTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"

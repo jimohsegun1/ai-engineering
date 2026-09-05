@@ -1,19 +1,8 @@
 """RAG chunking method: RecursiveCharacterTextSplitter.
 
-Tries a list of separators in order (paragraph break, then line break,
-then sentence, then word) so it can keep splitting an oversized chunk
-down using progressively smaller boundaries, instead of leaving it
-whole like 01_character_splitter.py does. This is the most commonly
-used general-purpose splitter, and what rag_pipeline.py uses too — it's
-included here again so all six methods can be compared side by side.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- RecursiveCharacterTextSplitter
-3. Create embeddings
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
+Falls back through smaller separators (paragraph, line, sentence, word)
+to keep splitting an oversized chunk down, unlike 01_character_splitter.py.
+The general-purpose default, and what rag_pipeline.py uses too.
 """
 
 import os
@@ -35,9 +24,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
@@ -76,8 +63,6 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking (RecursiveCharacterTextSplitter) ---
-# Falls back through ["\n\n", "\n", " ", ""] by default, so oversized
-# paragraphs still get split down to chunk_size where possible.
 print_step(2, "Chunking (RecursiveCharacterTextSplitter)")
 splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
 chunks = splitter.split_documents(documents)

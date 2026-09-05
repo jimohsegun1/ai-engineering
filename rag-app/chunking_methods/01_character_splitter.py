@@ -1,19 +1,9 @@
 """RAG chunking method: CharacterTextSplitter (fixed-size, single separator).
 
-The simplest chunking method. It splits text only on one separator (here,
-a blank line between paragraphs) and cuts chunks to chunk_size — but if a
-single paragraph is longer than chunk_size, CharacterTextSplitter does NOT
-split it further, so you can end up with chunks larger than chunk_size.
-Compare this with 02_recursive_character_splitter.py, which falls back to
+Splits only on one separator (a blank line here) and does NOT split an
+oversized paragraph further, so chunks can end up larger than chunk_size.
+Compare with 02_recursive_character_splitter.py, which falls back to
 smaller separators to avoid that.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- CharacterTextSplitter
-3. Create embeddings
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
 """
 
 import os
@@ -35,9 +25,7 @@ from langchain_text_splitters import CharacterTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
@@ -76,8 +64,6 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking (CharacterTextSplitter) ---
-# Splits only on the given separator. Chunks near chunk_size, but a
-# paragraph longer than chunk_size stays whole — it is not split further.
 print_step(2, "Chunking (CharacterTextSplitter)")
 splitter = CharacterTextSplitter(
     separator="\n\n",

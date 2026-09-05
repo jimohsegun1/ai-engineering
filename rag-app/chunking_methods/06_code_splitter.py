@@ -1,21 +1,8 @@
 """RAG chunking method: RecursiveCharacterTextSplitter.from_language().
 
 Same recursive-fallback idea as 02_recursive_character_splitter.py, but
-the separator list is language-specific — for Python, it prefers to
-split before "\\nclass ", "\\ndef ", etc., so chunks tend to break along
-function/class boundaries instead of mid-statement. Uses
-data/sample_code.py (a small Python module) as input, instead of the
-ML-basics text the other chunking methods use, since this method is
-specifically about chunking source code for a RAG-over-codebase use
-case.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- RecursiveCharacterTextSplitter.from_language(PYTHON)
-3. Create embeddings
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
+with Python-aware separators (class/def boundaries first) instead of
+prose separators. Uses data/sample_code.py as input.
 """
 
 import os
@@ -37,9 +24,7 @@ from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample_code.py"
@@ -78,8 +63,6 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking (RecursiveCharacterTextSplitter.from_language) ---
-# Uses Python-aware separators (class/def boundaries first) instead of
-# the generic paragraph/sentence separators used for prose text.
 print_step(2, "Chunking (code-aware, Python)")
 splitter = RecursiveCharacterTextSplitter.from_language(
     language=Language.PYTHON,

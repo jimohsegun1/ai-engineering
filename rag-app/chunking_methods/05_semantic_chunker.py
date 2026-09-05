@@ -1,22 +1,9 @@
 """RAG chunking method: SemanticChunker (langchain-experimental).
 
-Instead of splitting by a fixed size, this embeds each sentence and cuts
-a new chunk wherever the semantic similarity between consecutive
-sentences drops sharply — the idea being that a big meaning-shift is a
-better place to split than an arbitrary character count.
-
-This blurs the usual step 2/3 boundary: semantic chunking needs an
-embedding model *during* chunking, not after it. So step 2 below creates
-the embedding model early (normally step 3's job) in order to chunk,
-and step 3 just points out that the same model is being reused.
-
-Steps:
-1. Prepare input document
-2. Chunking            <- SemanticChunker (embeddings created here too)
-3. Create embeddings   <- reuses the model already created in step 2
-4. Store embeddings in vector database
-5. Similarity search
-6. RAG pipeline (commented out — uncomment when you're ready to call Qorebit)
+Embeds each sentence and cuts a new chunk wherever meaning shifts
+sharply between consecutive sentences, instead of splitting by a fixed
+size. This needs an embedding model *during* chunking, so step 2 below
+creates it early (normally step 3's job); step 3 just reuses it.
 """
 
 import os
@@ -38,9 +25,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-# Resolved from this file's own location, not the current working directory,
-# so this script runs correctly whether you're standing in rag-app/ or in
-# rag-app/chunking_methods/ when you run it.
+# Resolved from this file's location so it works from any working directory.
 RAG_APP_DIR = Path(__file__).resolve().parent.parent
 
 DOCUMENT_PATH = RAG_APP_DIR / "data" / "sample.txt"
@@ -77,26 +62,16 @@ print(f"Loaded {len(documents)} document(s) from {DOCUMENT_PATH}")
 
 
 # --- Step 2: Chunking (SemanticChunker) ---
-# Needs an embedding model to measure meaning-shifts between sentences,
-# so we create it here rather than in step 3 as the other files do.
-#
-# breakpoint_threshold_amount defaults to 95 (only the most extreme 5%
-# of meaning-shifts count as a split point), which is tuned for long
-# documents with many sentences. Our short sample doc only has ~10
-# sentences, so the default collapses almost everything into one giant
-# chunk. Lowering it to 50 makes the splitter sensitive enough to find
-# multiple breakpoints in a short document like this one.
-#
-# SemanticChunker can also emit an empty trailing chunk depending on
-# the document and threshold — we filter those out defensively.
 print_step(2, "Chunking (SemanticChunker)")
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+# Default threshold (95th percentile) is tuned for long documents and
+# collapses our short sample into one giant chunk; 50 works better here.
 splitter = SemanticChunker(
     embeddings,
     breakpoint_threshold_type="percentile",
     breakpoint_threshold_amount=50,
 )
-chunks = [c for c in splitter.split_documents(documents) if c.page_content.strip()]
+chunks = [c for c in splitter.split_documents(documents) if c.page_content.strip()]  # can emit an empty trailing chunk
 print(f"Split into {len(chunks)} chunks")
 for i, chunk in enumerate(chunks, start=1):
     print_passage(f"Chunk {i}/{len(chunks)}", chunk.page_content, len(chunk.page_content))
@@ -110,7 +85,7 @@ print(f"Reusing embedding model already loaded in step 2: {EMBEDDING_MODEL}")
 
 # --- Step 4: Store embeddings in vector database ---
 print_step(4, "Store embeddings in vector database")
-shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)
+shutil.rmtree(PERSIST_DIRECTORY, ignore_errors=True)  # avoid duplicating chunks on rerun
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
