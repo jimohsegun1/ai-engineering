@@ -1,0 +1,24 @@
+{
+  "concepts": [
+    {
+      "term": "Embedding",
+      "definition": "A vector of numbers that represents the meaning of a piece of text, positioned so that semantically similar text ends up nearby in vector space."
+    },
+    {
+      "term": "Retrieval-Augmented Generation",
+      "definition": "A technique where relevant documents are retrieved from a knowledge base and inserted into a prompt, so an LLM can answer using information it wasn't trained on."
+    },
+    {
+      "term": "Vector Database",
+      "definition": "A database optimized for storing embeddings and finding the nearest ones to a query vector, usually via an approximate nearest-neighbor index like HNSW."
+    },
+    {
+      "term": "Prompt Engineering",
+      "definition": "The practice of designing the wording, structure, and examples in a prompt to reliably steer a language model's output."
+    },
+    {
+      "term": "Chain",
+      "definition": "A composition of steps (prompts, models, parsers, or plain functions) run in sequence or parallel to produce a final output from an input."
+    }
+  ]
+}

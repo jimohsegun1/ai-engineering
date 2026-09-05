@@ -1,0 +1,16 @@
+Prompt Engineering Basics
+
+Prompt engineering is the practice of designing the wording, structure, and examples in a
+prompt so a language model reliably produces the output you want. A good prompt is specific
+about the task, the desired format, and any constraints, rather than leaving the model to
+guess.
+
+Common techniques include zero-shot prompting (just an instruction, no examples), few-shot
+prompting (a handful of input/output examples before the real question), and chain-of-thought
+prompting (asking the model to reason step by step before giving a final answer). Role-based
+prompting assigns the model a persona via a system message, which shapes tone and style
+without changing the underlying task.
+
+Structured output prompting asks the model to respond in a specific, machine-parseable
+format, such as JSON matching a schema, so the response can be validated and consumed
+directly by code instead of a human reading free text.

@@ -1,0 +1,6 @@
+language,year_created,paradigm,typing
+Python,1991,multi-paradigm,dynamic
+Rust,2010,systems,static
+JavaScript,1995,multi-paradigm,dynamic
+Haskell,1990,functional,static
+Go,2009,procedural,static
