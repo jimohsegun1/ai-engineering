@@ -101,7 +101,7 @@ or from inside `03-document-loaders/` itself.
 
 ## Memory demos
 
-`memory/` has five standalone files, each demonstrating a different LangChain conversation
+`04-memory/` has five standalone files, each demonstrating a different LangChain conversation
 memory type. Unlike the other demo folders, these don't run a retrieval pipeline — they save
 a fixed script of conversation turns into memory and print what each type retains after
 every turn, so you can compare them directly:
@@ -192,7 +192,7 @@ ai-engineering/                             # project root
 │   ├── 04_json_loader.py
 │   ├── 05_directory_loader.py
 │   └── 06_web_loader.py
-├── memory/                                # five conversation-memory demos, see table above
+├── 04-memory/                             # five conversation-memory demos, see table above
 │   ├── 01_buffer_memory.py
 │   ├── 02_buffer_window_memory.py
 │   ├── 03_summary_memory.py
@@ -225,7 +225,7 @@ ai-engineering/                             # project root
     ├── pdf/                                   # from rag_pipeline_pdf.py
     ├── chunking_<method>/                     # one per 01-chunking-methods/ file
     ├── loader_<method>/                       # one per 03-document-loaders/ file
-    └── memory_vectorstore/                    # from memory/05_vectorstore_retriever_memory.py
+    └── memory_vectorstore/                    # from 04-memory/05_vectorstore_retriever_memory.py
 ```
 
 ## Setup
@@ -333,10 +333,10 @@ python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — need
 python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
 ```
 
-The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `memory/`, `chains/`,
+The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `chains/`,
 `02-prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
 or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
-only for the commented-out step 6, and everything in `memory/`, `chains/`, and
+only for the commented-out step 6, and everything in `04-memory/`, `chains/`, and
 `02-prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base` model.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
@@ -407,7 +407,7 @@ in all three files if you want them all to use the same document.
   the only loader demo that calls out to a live URL instead of reading a local file. It also
   sets a `USER_AGENT` environment variable to avoid a harmless warning some sites' servers
   trigger when it's unset.
-- **`memory/`'s classic memory classes are deprecated but still functional.**
+- **`04-memory/`'s classic memory classes are deprecated but still functional.**
   `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
   import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
   instead, but the classes still work fine for learning the underlying concepts.
