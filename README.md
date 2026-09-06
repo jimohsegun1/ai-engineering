@@ -80,7 +80,7 @@ python rag-app/rag_pipeline_pdf.py
 
 ### Document loader demos
 
-`document-loader/` has six standalone files, each demonstrating a different LangChain
+`03-document-loaders/` has six standalone files, each demonstrating a different LangChain
 document loader (step 1) — everything else about the pipeline (or, for the smaller formats,
 what's left of it) stays the same. Step 6 (the Qorebit call) is commented out in every file,
 same as `01-chunking-methods/`:
@@ -97,7 +97,7 @@ same as `01-chunking-methods/`:
 For the row/record-shaped formats (CSV, JSON) chunking is skipped entirely — each row or
 record is already a small, self-contained unit of text, so step 2 just passes the documents
 through as-is. Run these the same way as `01-chunking-methods/`, either from the project root
-or from inside `document-loader/` itself.
+or from inside `03-document-loaders/` itself.
 
 ## Memory demos
 
@@ -185,7 +185,7 @@ ai-engineering/                             # project root
 │   ├── 04_markdown_header_splitter.py
 │   ├── 05_semantic_chunker.py
 │   └── 06_code_splitter.py
-├── document-loader/                      # six document-loader demos, see table above
+├── 03-document-loaders/                      # six document-loader demos, see table above
 │   ├── 01_text_loader.py
 │   ├── 02_pdf_loader.py
 │   ├── 03_csv_loader.py
@@ -224,7 +224,7 @@ ai-engineering/                             # project root
     ├── huggingface_hosted/                    # from rag_pipeline_huggingface_hosted.py
     ├── pdf/                                   # from rag_pipeline_pdf.py
     ├── chunking_<method>/                     # one per 01-chunking-methods/ file
-    ├── loader_<method>/                       # one per document-loader/ file
+    ├── loader_<method>/                       # one per 03-document-loaders/ file
     └── memory_vectorstore/                    # from memory/05_vectorstore_retriever_memory.py
 ```
 
@@ -333,7 +333,7 @@ python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — need
 python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
 ```
 
-The demo folders (`01-chunking-methods/`, `document-loader/`, `memory/`, `chains/`,
+The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `memory/`, `chains/`,
 `02-prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
 or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
 only for the commented-out step 6, and everything in `memory/`, `chains/`, and
@@ -400,10 +400,10 @@ in all three files if you want them all to use the same document.
   like our ~10-sentence sample into one giant chunk. The file lowers it to 50 so it finds
   multiple breakpoints instead — on a longer document you'd likely want it closer to the
   default. It can also emit an empty trailing chunk, which the file filters out.
-- **`document-loader/04_json_loader.py` needs the `jq` package.** `JSONLoader` uses jq
+- **`03-document-loaders/04_json_loader.py` needs the `jq` package.** `JSONLoader` uses jq
   schemas to pull data out of nested JSON, so it depends on the `jq` Python bindings
   (in `requirements.txt`) rather than just `langchain-community`.
-- **`document-loader/06_web_loader.py` needs internet access and `beautifulsoup4`.** It's
+- **`03-document-loaders/06_web_loader.py` needs internet access and `beautifulsoup4`.** It's
   the only loader demo that calls out to a live URL instead of reading a local file. It also
   sets a `USER_AGENT` environment variable to avoid a harmless warning some sites' servers
   trigger when it's unset.
