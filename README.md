@@ -122,7 +122,7 @@ for this learning project.
 
 ## Chain composition demos
 
-`chains/` has five standalone files, each demonstrating a different way to compose LCEL
+`05-chains/` has five standalone files, each demonstrating a different way to compose LCEL
 (`|`-piped) chains together. All five run on the local, free `google/flan-t5-base` model, so
 there's no Qorebit step to comment out here:
 
@@ -198,7 +198,7 @@ ai-engineering/                             # project root
 │   ├── 03_summary_memory.py
 │   ├── 04_summary_buffer_memory.py
 │   └── 05_vectorstore_retriever_memory.py
-├── chains/                                # five LCEL chain-composition demos, see table above
+├── 05-chains/                             # five LCEL chain-composition demos, see table above
 │   ├── 01_simple_chain.py
 │   ├── 02_sequential_chain.py
 │   ├── 03_parallel_chain.py
@@ -333,10 +333,10 @@ python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — need
 python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
 ```
 
-The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `chains/`,
+The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `05-chains/`,
 `02-prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
 or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
-only for the commented-out step 6, and everything in `04-memory/`, `chains/`, and
+only for the commented-out step 6, and everything in `04-memory/`, `05-chains/`, and
 `02-prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base` model.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
@@ -411,7 +411,7 @@ in all three files if you want them all to use the same document.
   `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
   import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
   instead, but the classes still work fine for learning the underlying concepts.
-- **`flan-t5-base` is an unreliable model for `chains/` and `02-prompt-engineering/`.** It's
+- **`flan-t5-base` is an unreliable model for `05-chains/` and `02-prompt-engineering/`.** It's
   the same small (~250M parameter) model used in `rag_pipeline_huggingface.py`, chosen for
   being free and CPU-friendly, not for quality. Expect chain-of-thought answers to sometimes
   loop or drift, and expect `05_structured_output_prompting.py`'s JSON parsing to fail more
