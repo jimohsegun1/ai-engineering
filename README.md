@@ -136,7 +136,7 @@ there's no Qorebit step to comment out here:
 
 ## Prompt engineering demos
 
-`prompt-engineering/` has five standalone files, each demonstrating a different prompting
+`02-prompt-engineering/` has five standalone files, each demonstrating a different prompting
 technique on the same local `google/flan-t5-base` model:
 
 | File | Technique | What it shows |
@@ -204,7 +204,7 @@ ai-engineering/                             # project root
 │   ├── 03_parallel_chain.py
 │   ├── 04_router_chain.py
 │   └── 05_transform_chain.py
-├── prompt-engineering/                    # five prompting-technique demos, see table above
+├── 02-prompt-engineering/                    # five prompting-technique demos, see table above
 │   ├── 01_zero_shot_prompting.py
 │   ├── 02_few_shot_prompting.py
 │   ├── 03_chain_of_thought_prompting.py
@@ -334,10 +334,10 @@ python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QO
 ```
 
 The demo folders (`01-chunking-methods/`, `document-loader/`, `memory/`, `chains/`,
-`prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
+`02-prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
 or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
 only for the commented-out step 6, and everything in `memory/`, `chains/`, and
-`prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base` model.
+`02-prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base` model.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
@@ -411,7 +411,7 @@ in all three files if you want them all to use the same document.
   `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
   import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
   instead, but the classes still work fine for learning the underlying concepts.
-- **`flan-t5-base` is an unreliable model for `chains/` and `prompt-engineering/`.** It's
+- **`flan-t5-base` is an unreliable model for `chains/` and `02-prompt-engineering/`.** It's
   the same small (~250M parameter) model used in `rag_pipeline_huggingface.py`, chosen for
   being free and CPU-friendly, not for quality. Expect chain-of-thought answers to sometimes
   loop or drift, and expect `05_structured_output_prompting.py`'s JSON parsing to fail more
