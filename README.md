@@ -31,7 +31,7 @@ All three use the same free local Hugging Face model for embeddings (step 3):
 
 ### Chunking method demos
 
-`chunking_methods/` has six standalone files, each demonstrating a different chunking
+`01-chunking-methods/` has six standalone files, each demonstrating a different chunking
 (step 2) strategy — everything else about the pipeline stays the same. In every file, step
 6 (the Qorebit call) is **commented out on purpose**, so you can read/run steps 1-5 for
 free and uncomment step 6 yourself when you're ready to spend Qorebit credits:
@@ -48,20 +48,20 @@ free and uncomment step 6 yourself when you're ready to spend Qorebit credits:
 Every file resolves its input/output paths from its own location, not the current working
 directory, so you can run them either from the project root:
 ```powershell
-python chunking_methods/01_character_splitter.py
-python chunking_methods/02_recursive_character_splitter.py
-python chunking_methods/03_token_splitter.py
-python chunking_methods/04_markdown_header_splitter.py
-python chunking_methods/05_semantic_chunker.py
-python chunking_methods/06_code_splitter.py
+python 01-chunking-methods/01_character_splitter.py
+python 01-chunking-methods/02_recursive_character_splitter.py
+python 01-chunking-methods/03_token_splitter.py
+python 01-chunking-methods/04_markdown_header_splitter.py
+python 01-chunking-methods/05_semantic_chunker.py
+python 01-chunking-methods/06_code_splitter.py
 ```
-or from inside `chunking_methods/` itself:
+or from inside `01-chunking-methods/` itself:
 ```powershell
-cd chunking_methods
+cd 01-chunking-methods
 python 01_character_splitter.py
 ```
 Either way, the venv still needs to be active and `data/`/`db/` are always resolved
-relative to the project root, never relative to `chunking_methods/`.
+relative to the project root, never relative to `01-chunking-methods/`.
 
 ### PDF input demo
 
@@ -83,7 +83,7 @@ python rag-app/rag_pipeline_pdf.py
 `document-loader/` has six standalone files, each demonstrating a different LangChain
 document loader (step 1) — everything else about the pipeline (or, for the smaller formats,
 what's left of it) stays the same. Step 6 (the Qorebit call) is commented out in every file,
-same as `chunking_methods/`:
+same as `01-chunking-methods/`:
 
 | File | Loader | Input | What it shows |
 | --- | --- | --- | --- |
@@ -96,7 +96,7 @@ same as `chunking_methods/`:
 
 For the row/record-shaped formats (CSV, JSON) chunking is skipped entirely — each row or
 record is already a small, self-contained unit of text, so step 2 just passes the documents
-through as-is. Run these the same way as `chunking_methods/`, either from the project root
+through as-is. Run these the same way as `01-chunking-methods/`, either from the project root
 or from inside `document-loader/` itself.
 
 ## Memory demos
@@ -178,7 +178,7 @@ ai-engineering/                             # project root
 │   ├── sample.pdf                        # small 3-page PDF, for rag_pipeline_pdf.py / the PDF loader demo
 │   ├── sample.csv                        # small table, for the CSV loader demo
 │   └── sample.json                       # small nested JSON file, for the JSON loader demo
-├── chunking_methods/                     # six chunking-method demos, see table above
+├── 01-chunking-methods/                     # six chunking-method demos, see table above
 │   ├── 01_character_splitter.py
 │   ├── 02_recursive_character_splitter.py
 │   ├── 03_token_splitter.py
@@ -223,7 +223,7 @@ ai-engineering/                             # project root
     ├── huggingface_local/                     # from rag_pipeline_huggingface.py
     ├── huggingface_hosted/                    # from rag_pipeline_huggingface_hosted.py
     ├── pdf/                                   # from rag_pipeline_pdf.py
-    ├── chunking_<method>/                     # one per chunking_methods/ file
+    ├── chunking_<method>/                     # one per 01-chunking-methods/ file
     ├── loader_<method>/                       # one per document-loader/ file
     └── memory_vectorstore/                    # from memory/05_vectorstore_retriever_memory.py
 ```
@@ -233,7 +233,7 @@ ai-engineering/                             # project root
 ### 1. Open a terminal in the project folder
 
 Navigate to the project root — every command below assumes you're standing in this
-directory (not inside `rag-app/` or `chunking_methods/`).
+directory (not inside `rag-app/` or `01-chunking-methods/`).
 
 **PowerShell:**
 ```powershell
@@ -333,7 +333,7 @@ python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — need
 python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
 ```
 
-The demo folders (`chunking_methods/`, `document-loader/`, `memory/`, `chains/`,
+The demo folders (`01-chunking-methods/`, `document-loader/`, `memory/`, `chains/`,
 `prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
 or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
 only for the commented-out step 6, and everything in `memory/`, `chains/`, and
