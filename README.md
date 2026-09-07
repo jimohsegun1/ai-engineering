@@ -122,9 +122,10 @@ for this learning project.
 
 ## Chain composition demos
 
-`05-chains/` has five standalone files, each demonstrating a different way to compose LCEL
-(`|`-piped) chains together. All five run on the local, free `google/flan-t5-base` model, so
-there's no Qorebit step to comment out here:
+`05-chains/` has ten standalone files, each demonstrating a different way to compose chains
+together — five general LCEL composition patterns, plus five of LangChain's dedicated
+document/utility chain constructors. All ten run on the local, free `google/flan-t5-base`
+model, so there's no Qorebit step to comment out here:
 
 | File | Pattern | What it shows |
 | --- | --- | --- |
@@ -133,6 +134,11 @@ there's no Qorebit step to comment out here:
 | `03_parallel_chain.py` | `RunnableParallel` | Runs two independent chains against the same input at once instead of one after another |
 | `04_router_chain.py` | `RunnableBranch` | Sends an input down one of several chains depending on a condition |
 | `05_transform_chain.py` | `RunnableLambda` | A plain-Python transform step inserted into a chain — not every step has to call an LLM |
+| `06_stuff_documents_chain.py` | `create_stuff_documents_chain` | The official building block for the "concatenate every doc into one prompt" pattern rag-app builds by hand |
+| `07_map_reduce_chain.py` | `load_summarize_chain(chain_type="map_reduce")` | Summarizes each document independently, then combines those summaries into one |
+| `08_refine_chain.py` | `load_summarize_chain(chain_type="refine")` | Processes documents one at a time, refining a running summary instead of combining independent ones |
+| `09_retrieval_chain.py` | `create_retrieval_chain` | The modern replacement for the legacy `RetrievalQA` chain — retriever + stuff-documents chain in one call |
+| `10_math_chain.py` | `LLMMathChain` | The LLM writes a Python expression for a word problem, then `numexpr` evaluates it instead of trusting the model's arithmetic |
 
 ## Prompt engineering demos
 
@@ -198,12 +204,17 @@ ai-engineering/                             # project root
 │   ├── 03_summary_memory.py
 │   ├── 04_summary_buffer_memory.py
 │   └── 05_vectorstore_retriever_memory.py
-├── 05-chains/                             # five LCEL chain-composition demos, see table above
+├── 05-chains/                             # ten chain-composition demos, see table above
 │   ├── 01_simple_chain.py
 │   ├── 02_sequential_chain.py
 │   ├── 03_parallel_chain.py
 │   ├── 04_router_chain.py
-│   └── 05_transform_chain.py
+│   ├── 05_transform_chain.py
+│   ├── 06_stuff_documents_chain.py
+│   ├── 07_map_reduce_chain.py
+│   ├── 08_refine_chain.py
+│   ├── 09_retrieval_chain.py
+│   └── 10_math_chain.py
 ├── 02-prompt-engineering/                    # five prompting-technique demos, see table above
 │   ├── 01_zero_shot_prompting.py
 │   ├── 02_few_shot_prompting.py
@@ -225,7 +236,8 @@ ai-engineering/                             # project root
     ├── pdf/                                   # from rag_pipeline_pdf.py
     ├── chunking_<method>/                     # one per 01-chunking-methods/ file
     ├── loader_<method>/                       # one per 03-document-loaders/ file
-    └── memory_vectorstore/                    # from 04-memory/05_vectorstore_retriever_memory.py
+    ├── memory_vectorstore/                    # from 04-memory/05_vectorstore_retriever_memory.py
+    └── chains_retrieval/                      # from 05-chains/09_retrieval_chain.py
 ```
 
 ## Setup
@@ -414,5 +426,9 @@ in all three files if you want them all to use the same document.
 - **`flan-t5-base` is an unreliable model for `05-chains/` and `02-prompt-engineering/`.** It's
   the same small (~250M parameter) model used in `rag_pipeline_huggingface.py`, chosen for
   being free and CPU-friendly, not for quality. Expect chain-of-thought answers to sometimes
-  loop or drift, and expect `05_structured_output_prompting.py`'s JSON parsing to fail more
-  often than it succeeds — both files handle that gracefully rather than assuming success.
+  loop or drift, and expect `05_structured_output_prompting.py`'s JSON parsing and
+  `05-chains/10_math_chain.py`'s expression parsing to fail more often than they succeed —
+  all three files handle that gracefully rather than assuming success.
+- **`05-chains/10_math_chain.py` needs the `numexpr` package.** `LLMMathChain` evaluates the
+  expression the LLM writes with `numexpr` rather than Python's own `eval`, so it depends on
+  `numexpr` (in `requirements.txt`) in addition to `langchain`.
