@@ -122,10 +122,10 @@ for this learning project.
 
 ## Chain composition demos
 
-`05-chains/` has ten standalone files, each demonstrating a different way to compose chains
-together — five general LCEL composition patterns, plus five of LangChain's dedicated
-document/utility chain constructors. All ten run on the local, free `google/flan-t5-base`
-model, so there's no Qorebit step to comment out here:
+`05-chains/` has eleven standalone files, each demonstrating a different way to compose
+chains together — five general LCEL composition patterns, plus six of LangChain's dedicated
+document/retrieval/utility chain constructors. All eleven run on the local, free
+`google/flan-t5-base` model, so there's no Qorebit step to comment out here:
 
 | File | Pattern | What it shows |
 | --- | --- | --- |
@@ -139,6 +139,7 @@ model, so there's no Qorebit step to comment out here:
 | `08_refine_chain.py` | `load_summarize_chain(chain_type="refine")` | Processes documents one at a time, refining a running summary instead of combining independent ones |
 | `09_retrieval_chain.py` | `create_retrieval_chain` | The modern replacement for the legacy `RetrievalQA` chain — retriever + stuff-documents chain in one call |
 | `10_math_chain.py` | `LLMMathChain` | The LLM writes a Python expression for a word problem, then `numexpr` evaluates it instead of trusting the model's arithmetic |
+| `11_conversational_retrieval_chain.py` | `create_history_aware_retriever` + `create_retrieval_chain` | A RAG chain with memory — rewrites a vague follow-up ("why is it useful?") into a standalone question using chat history *before* retrieving; the modern replacement for the legacy `ConversationalRetrievalChain` |
 
 ## Prompt engineering demos
 
@@ -204,7 +205,7 @@ ai-engineering/                             # project root
 │   ├── 03_summary_memory.py
 │   ├── 04_summary_buffer_memory.py
 │   └── 05_vectorstore_retriever_memory.py
-├── 05-chains/                             # ten chain-composition demos, see table above
+├── 05-chains/                             # eleven chain-composition demos, see table above
 │   ├── 01_simple_chain.py
 │   ├── 02_sequential_chain.py
 │   ├── 03_parallel_chain.py
@@ -214,7 +215,8 @@ ai-engineering/                             # project root
 │   ├── 07_map_reduce_chain.py
 │   ├── 08_refine_chain.py
 │   ├── 09_retrieval_chain.py
-│   └── 10_math_chain.py
+│   ├── 10_math_chain.py
+│   └── 11_conversational_retrieval_chain.py
 ├── 02-prompt-engineering/                    # five prompting-technique demos, see table above
 │   ├── 01_zero_shot_prompting.py
 │   ├── 02_few_shot_prompting.py
@@ -237,7 +239,8 @@ ai-engineering/                             # project root
     ├── chunking_<method>/                     # one per 01-chunking-methods/ file
     ├── loader_<method>/                       # one per 03-document-loaders/ file
     ├── memory_vectorstore/                    # from 04-memory/05_vectorstore_retriever_memory.py
-    └── chains_retrieval/                      # from 05-chains/09_retrieval_chain.py
+    ├── chains_retrieval/                      # from 05-chains/09_retrieval_chain.py
+    └── chains_conversational/                 # from 05-chains/11_conversational_retrieval_chain.py
 ```
 
 ## Setup
