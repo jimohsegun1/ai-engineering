@@ -98,15 +98,15 @@ for i, doc in enumerate(results, start=1):
     print_passage(f"Result {i}/{TOP_K}", doc.page_content)
 
 
-# --- Step 6: RAG pipeline ---
-# Commented out on purpose — uncomment when you're ready to call Qorebit.
+# # --- Step 6: RAG pipeline ---
+# # Commented out on purpose — uncomment when you're ready to call Qorebit.
 # print_step(6, "RAG pipeline")
-#
-#
+
+
 # def format_docs(docs) -> str:
 #     return "\n\n".join(doc.page_content for doc in docs)
-#
-#
+
+
 # retriever = vector_store.as_retriever(search_kwargs={"k": TOP_K})
 # llm = ChatOpenAI(
 #     model=CHAT_MODEL,
@@ -122,22 +122,22 @@ for i, doc in enumerate(results, start=1):
 # prompt = ChatPromptTemplate.from_template(
 #     """Answer the question using only the context below.
 # If the context doesn't contain the answer, say you don't know.
-#
+
 # Context:
 # {context}
-#
+
 # Question: {question}
-#
+
 # Answer:"""
 # )
-#
+
 # rag_chain = (
 #     {"context": retriever | format_docs, "question": RunnablePassthrough()}
 #     | prompt
 #     | llm
 #     | StrOutputParser()
 # )
-#
+
 # answer = rag_chain.invoke(QUESTION)
 # print(f"Question: {QUESTION}")
 # print_passage("Answer", answer)
