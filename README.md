@@ -2,8 +2,8 @@
 
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
-memory, chain composition, and prompting techniques. Every file runs on its own; none of the
-demo folders depend on each other.
+memory, chain composition, prompting techniques, and agents. Every file runs on its own; none
+of the demo folders depend on each other.
 
 ## RAG pipeline
 
@@ -159,6 +159,38 @@ answers can loop or drift, and structured-output parsing often fails outright. T
 each file and is expected; the point is to see the prompting mechanics work, not to get
 perfect answers out of a ~250M parameter model.
 
+## Agent demos
+
+Unlike a chain, an agent doesn't follow a fixed sequence — the LLM decides at each turn
+whether to call a tool or give a final answer, based on its own reasoning. `06-agents/` has
+five standalone files. This is the one folder that **doesn't** use `flan-t5-base`: reliable
+tool use needs a real instruction-tuned model, so these run on
+[Ollama](https://ollama.com) — a free, local model runner — with `llama3.2:3b` instead:
+
+| File | Pattern | What it shows |
+| --- | --- | --- |
+| `01_react_agent.py` | `create_react_agent` (ReAct) | The classic text-based Thought/Action/Observation loop — brittle even on a real model, see the note below |
+| `02_custom_tools.py` | `@tool` | How a plain Python function becomes something an agent can be told about and call — no LLM involved |
+| `03_tool_calling_agent.py` | `create_tool_calling_agent` | The modern replacement for ReAct: the model returns a structured tool call directly instead of text to parse |
+| `04_retriever_tool_agent.py` | `create_retriever_tool` | Wraps a Chroma retriever as a tool so the agent decides for itself whether a question needs a document lookup |
+| `05_multi_tool_agent.py` | multiple tools on one agent | A calculator, a word counter, and a retriever together — asks several questions to see which tool (if any) gets picked each time |
+
+**Ollama setup** (only needed for this folder):
+1. Install [Ollama](https://ollama.com/download) (or `winget install Ollama.Ollama` on Windows) — it runs as a local background service.
+2. Pull the model this folder uses: `ollama pull llama3.2:3b` (~2GB download, one-time).
+3. That's it — no API key, and `langchain-ollama` is already in `requirements.txt`.
+
+**`01_react_agent.py` is a known-brittle demo, on purpose.** llama3.2:3b often computes the
+correct answer via the calculator tool — repeatedly — but never actually writes the
+`Final Answer:` line the ReAct parser is watching for, so it loops until `max_iterations`
+(set to 5 here) cuts it off and returns "Agent stopped due to iteration limit." This is a
+real, reproducible limitation of the older text-based ReAct format on smaller models, not a
+bug in the code — that's exactly why `03_tool_calling_agent.py` exists: the same kind of task
+works cleanly once the model's native tool-calling is used instead of text parsing.
+`04_retriever_tool_agent.py` has a milder version of the same issue: llama3.2:3b sometimes
+calls the retriever tool for a question that doesn't need it, or even invents an unavailable
+tool name, instead of just answering directly.
+
 ## Stack
 
 - **Document loading / chunking**: LangChain (`TextLoader` or `PyPDFLoader`, `RecursiveCharacterTextSplitter`)
@@ -166,8 +198,9 @@ perfect answers out of a ~250M parameter model.
 - **Vector database**: Chroma — every file persists under `db/`, each to its own
   subfolder (e.g. `db/qorebit/`, `db/huggingface_local/`, `db/chunking_code/`) so running
   one never clobbers another's store
-- **LLM (generation)**: Qorebit, a local `flan-t5-base` model, or Hugging Face's hosted
-  Inference API — see the table above for which file uses which
+- **LLM (generation)**: Qorebit, a local `flan-t5-base` model, Hugging Face's hosted
+  Inference API, or Ollama (`llama3.2:3b`, local) for `06-agents/` — see the tables above for
+  which file uses which
 
 ## Project structure
 
@@ -223,6 +256,12 @@ ai-engineering/                             # project root
 │   ├── 03_chain_of_thought_prompting.py
 │   ├── 04_role_based_prompting.py
 │   └── 05_structured_output_prompting.py
+├── 06-agents/                             # five agent demos, see table above (needs Ollama)
+│   ├── 01_react_agent.py
+│   ├── 02_custom_tools.py
+│   ├── 03_tool_calling_agent.py
+│   ├── 04_retriever_tool_agent.py
+│   └── 05_multi_tool_agent.py
 ├── rag-app/
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
@@ -240,7 +279,9 @@ ai-engineering/                             # project root
     ├── loader_<method>/                       # one per 03-document-loaders/ file
     ├── memory_vectorstore/                    # from 04-memory/05_vectorstore_retriever_memory.py
     ├── chains_retrieval/                      # from 05-chains/09_retrieval_chain.py
-    └── chains_conversational/                 # from 05-chains/11_conversational_retrieval_chain.py
+    ├── chains_conversational/                 # from 05-chains/11_conversational_retrieval_chain.py
+    ├── agents_retriever_tool/                 # from 06-agents/04_retriever_tool_agent.py
+    └── agents_multi_tool/                     # from 06-agents/05_multi_tool_agent.py
 ```
 
 ## Setup
@@ -349,10 +390,12 @@ python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QO
 ```
 
 The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `05-chains/`,
-`02-prompt-engineering/`) run the same way — `python <folder>/<file>.py` from the project root,
-or `cd` into the folder first. None of them need an API key: the RAG-style ones use Qorebit
-only for the commented-out step 6, and everything in `04-memory/`, `05-chains/`, and
-`02-prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base` model.
+`02-prompt-engineering/`, `06-agents/`) run the same way — `python <folder>/<file>.py` from
+the project root, or `cd` into the folder first. None of them need an API key: the RAG-style
+ones use Qorebit only for the commented-out step 6, everything in `04-memory/`, `05-chains/`,
+and `02-prompt-engineering/` that needs an LLM at all uses the free local `flan-t5-base`
+model, and `06-agents/` uses the free local Ollama model instead (see its setup steps above —
+it's the one folder that needs something installed beyond `pip install`).
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
