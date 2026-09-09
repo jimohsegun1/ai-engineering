@@ -350,10 +350,13 @@ pip install -r requirements.txt
 This is the slowest step the first time (a few minutes) since it downloads the embedding
 model's dependencies (PyTorch, etc.). Later installs are fast.
 
-### 5. Set up your API keys (only needed for two of the three files)
+### 5. Set up your API keys (only needed for a couple of files)
 
-`rag_pipeline_huggingface.py` needs no API key at all — skip this step if that's the only
-file you plan to run.
+Most of this project needs no API key at all: every demo folder
+(`01-chunking-methods/`, `02-prompt-engineering/`, `03-document-loaders/`, `04-memory/`,
+`05-chains/`, `06-agents/`) and `rag_pipeline_huggingface.py` run on free local models. Skip
+this step entirely unless you plan to run `rag_pipeline.py`, `rag_pipeline_pdf.py`, or
+`rag_pipeline_huggingface_hosted.py`.
 
 Copy the template into a real `.env` file:
 
@@ -368,8 +371,8 @@ cp .env.example .env
 ```
 
 Then open `.env` and fill in whichever key(s) you need:
-- `QOREBIT_API_KEY` — for `rag_pipeline.py`. From your Qorebit dashboard → API Keys, looks
-  like `qb_live_...`.
+- `QOREBIT_API_KEY` — for `rag_pipeline.py` and `rag_pipeline_pdf.py`. From your Qorebit
+  dashboard → API Keys, looks like `qb_live_...`.
 - `HUGGINGFACEHUB_API_TOKEN` — for `rag_pipeline_huggingface_hosted.py`. Get a free one at
   [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) → "Create new
   token" → Read access is enough.
@@ -411,8 +414,9 @@ all, since that model runs on Hugging Face's servers, not yours.
 
 Open whichever file you're using and change the `QUESTION` constant near the top, then
 rerun it. You can also swap in your own document by replacing `data/sample.txt` (or
-changing `DOCUMENT_PATH`) and adjusting `CHUNK_SIZE` / `CHUNK_OVERLAP` if needed — do this
-in all three files if you want them all to use the same document.
+changing `DOCUMENT_PATH`) and adjusting `CHUNK_SIZE` / `CHUNK_OVERLAP` if needed — repeat the
+change in every file you want to use the same document, since each one sets these constants
+independently.
 
 ## Notes / gotchas
 
@@ -478,3 +482,11 @@ in all three files if you want them all to use the same document.
 - **`05-chains/10_math_chain.py` needs the `numexpr` package.** `LLMMathChain` evaluates the
   expression the LLM writes with `numexpr` rather than Python's own `eval`, so it depends on
   `numexpr` (in `requirements.txt`) in addition to `langchain`.
+- **`langchain` and `langchain-community` are pinned newer than you might expect (0.3.30 /
+  0.3.15, not the original 0.3.7).** `langchain-ollama` needs a `langchain-core` recent
+  enough that its own `langsmith` floor no longer fits under the old `langchain==0.3.7`'s
+  `langsmith<0.2.0` ceiling — a real, unavoidable resolver conflict, not a preference. Both
+  bumps stay within the same 0.3.x line (no breaking changes), and the full test suite passed
+  before and after the bump. If `pip install -r requirements.txt` ever reports a `langsmith`
+  conflict again, it means one of these three packages' pins drifted apart — re-resolve them
+  together rather than pinning `langsmith` directly.

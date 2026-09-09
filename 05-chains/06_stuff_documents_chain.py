@@ -39,7 +39,7 @@ prompt = PromptTemplate.from_template("Answer using only this context:\n\n{conte
 chain = create_stuff_documents_chain(llm, prompt)
 
 print_step(2, "Invoke with all documents stuffed into one prompt")
-print(f"Documents:\n" + "\n".join(f"  - {doc.page_content}" for doc in DOCS))
+print("Documents:\n" + "\n".join(f"  - {doc.page_content}" for doc in DOCS))
 answer = chain.invoke({"context": DOCS, "input": QUESTION})
 print(f"\nQuestion: {QUESTION}")
 print(f"Answer: {answer}")
