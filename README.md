@@ -2,8 +2,8 @@
 
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
-memory, chain composition, prompting techniques, and agents. Every file runs on its own; none
-of the demo folders depend on each other.
+memory, chain composition, prompting techniques, agents, and LangGraph. Every file runs on
+its own; none of the demo folders depend on each other.
 
 ## RAG pipeline
 
@@ -215,6 +215,27 @@ streaming makes the client request the full response in one piece instead, which
 bug entirely. `01_react_agent_qorebit.py` doesn't need this flag, since ReAct's plain-text
 format never involves a `tool_call` id in the first place.
 
+## LangGraph demos
+
+`06-agents/` builds agents by hand with the older `AgentExecutor`. LangGraph is the newer,
+more general framework underneath: instead of a fixed agent loop, you define a graph of nodes
+that read and write a shared state, and LangGraph handles running it. `07-langgraph/` has
+five standalone files, all on the same free local Ollama model (`llama3.2:3b`) used in
+`06-agents/`:
+
+| File | Concept | What it shows |
+| --- | --- | --- |
+| `01_simple_graph.py` | `StateGraph`, nodes, edges | The fundamental mechanic — two plain-function nodes run in sequence, no LLM at all |
+| `02_conditional_graph.py` | `add_conditional_edges` | Routes to one of two nodes based on a rule — the graph-based equivalent of `05-chains/04_router_chain.py` |
+| `03_tool_calling_agent.py` | `langgraph.prebuilt.create_react_agent` | The same tool-calling agent as `06-agents/03_tool_calling_agent.py`, built in one call instead of assembling a prompt + executor by hand |
+| `04_persistent_memory.py` | `MemorySaver` checkpointer + `thread_id` | The agent remembers earlier turns automatically — the modern replacement for wrapping `04-memory/`'s memory classes around an agent |
+| `05_multi_agent_graph.py` | multiple specialized nodes | A retriever-only "researcher" node feeds an LLM-backed "writer" node — a basic multi-node composition, one step short of a full multi-agent supervisor |
+
+Needs the same Ollama setup as `06-agents/` (see its section above) — no API key. You'll see a
+harmless `LangChainPendingDeprecationWarning` about `allowed_objects` on every run; it comes
+from LangGraph's own checkpoint-serialization internals, not from anything in these files, and
+doesn't affect the output.
+
 ## Stack
 
 - **Document loading / chunking**: LangChain (`TextLoader` or `PyPDFLoader`, `RecursiveCharacterTextSplitter`)
@@ -223,8 +244,8 @@ format never involves a `tool_call` id in the first place.
   subfolder (e.g. `db/qorebit/`, `db/huggingface_local/`, `db/chunking_code/`) so running
   one never clobbers another's store
 - **LLM (generation)**: Qorebit, a local `flan-t5-base` model, Hugging Face's hosted
-  Inference API, or Ollama (`llama3.2:3b`, local) for `06-agents/` — see the tables above for
-  which file uses which
+  Inference API, or Ollama (`llama3.2:3b`, local) for `06-agents/` and `07-langgraph/` — see
+  the tables above for which file uses which
 
 ## Project structure
 
@@ -290,6 +311,12 @@ ai-engineering/                             # project root
 │   ├── 04_retriever_tool_agent_qorebit.py     # Qorebit
 │   ├── 05_multi_tool_agent.py                 # Ollama
 │   └── 05_multi_tool_agent_qorebit.py         # Qorebit
+├── 07-langgraph/                          # five LangGraph demos, see table above (needs Ollama)
+│   ├── 01_simple_graph.py
+│   ├── 02_conditional_graph.py
+│   ├── 03_tool_calling_agent.py
+│   ├── 04_persistent_memory.py
+│   └── 05_multi_agent_graph.py
 ├── rag-app/
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
@@ -311,7 +338,8 @@ ai-engineering/                             # project root
     ├── agents_retriever_tool/                 # from 06-agents/04_retriever_tool_agent.py
     ├── agents_multi_tool/                     # from 06-agents/05_multi_tool_agent.py
     ├── agents_retriever_tool_qorebit/          # from 06-agents/04_retriever_tool_agent_qorebit.py
-    └── agents_multi_tool_qorebit/              # from 06-agents/05_multi_tool_agent_qorebit.py
+    ├── agents_multi_tool_qorebit/              # from 06-agents/05_multi_tool_agent_qorebit.py
+    └── langgraph_multi_agent/                  # from 07-langgraph/05_multi_agent_graph.py
 ```
 
 ## Setup
@@ -384,11 +412,11 @@ model's dependencies (PyTorch, etc.). Later installs are fast.
 
 Most of this project needs no API key at all: every demo folder
 (`01-chunking-methods/`, `02-prompt-engineering/`, `03-document-loaders/`, `04-memory/`,
-`05-chains/`) and `rag_pipeline_huggingface.py` run on free local models, and so do the
-non-`_qorebit.py` files in `06-agents/` (they use Ollama instead — see its own setup steps in
-that section). Skip this step entirely unless you plan to run `rag_pipeline.py`,
-`rag_pipeline_pdf.py`, `rag_pipeline_huggingface_hosted.py`, or one of `06-agents/`'s
-`_qorebit.py` files.
+`05-chains/`) and `rag_pipeline_huggingface.py` run on free local models, and so do
+`07-langgraph/` and the non-`_qorebit.py` files in `06-agents/` (they use Ollama instead —
+see its own setup steps in that section). Skip this step entirely unless you plan to run
+`rag_pipeline.py`, `rag_pipeline_pdf.py`, `rag_pipeline_huggingface_hosted.py`, or one of
+`06-agents/`'s `_qorebit.py` files.
 
 Copy the template into a real `.env` file:
 
@@ -426,14 +454,15 @@ python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QO
 ```
 
 The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `05-chains/`,
-`02-prompt-engineering/`, `06-agents/`) run the same way — `python <folder>/<file>.py` from
-the project root, or `cd` into the folder first. Almost none of them need an API key: the
-RAG-style ones use Qorebit only for the commented-out step 6, everything in `04-memory/`,
-`05-chains/`, and `02-prompt-engineering/` that needs an LLM at all uses the free local
-`flan-t5-base` model, and most of `06-agents/` uses the free local Ollama model instead (see
-its setup steps above — it's the one folder that needs something installed beyond
-`pip install`). The exception is `06-agents/`'s four `*_qorebit.py` files, which need
-`QOREBIT_API_KEY` and make a real, live Qorebit call every time you run them.
+`02-prompt-engineering/`, `06-agents/`, `07-langgraph/`) run the same way —
+`python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
+of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
+everything in `04-memory/`, `05-chains/`, and `02-prompt-engineering/` that needs an LLM at
+all uses the free local `flan-t5-base` model, and `07-langgraph/` plus most of `06-agents/`
+use the free local Ollama model instead (see the setup steps above — Ollama is the one thing
+in this project that needs installing beyond `pip install`). The exception is `06-agents/`'s
+four `*_qorebit.py` files, which need `QOREBIT_API_KEY` and make a real, live Qorebit call
+every time you run them.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
