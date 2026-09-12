@@ -220,7 +220,7 @@ format never involves a `tool_call` id in the first place.
 `06-agents/` builds agents by hand with the older `AgentExecutor`. LangGraph is the newer,
 more general framework underneath: instead of a fixed agent loop, you define a graph of nodes
 that read and write a shared state, and LangGraph handles running it. `07-langgraph/` has
-six standalone files, all on the same free local Ollama model (`llama3.2:3b`) used in
+seven standalone files, all on the same free local Ollama model (`llama3.2:3b`) used in
 `06-agents/`:
 
 | File | Concept | What it shows |
@@ -231,6 +231,7 @@ six standalone files, all on the same free local Ollama model (`llama3.2:3b`) us
 | `04_persistent_memory.py` | `MemorySaver` checkpointer + `thread_id` | The agent remembers earlier turns automatically — the modern replacement for wrapping `04-memory/`'s memory classes around an agent |
 | `05_multi_agent_graph.py` | multiple specialized nodes | A retriever-only "researcher" node feeds an LLM-backed "writer" node — a basic multi-node composition, one step short of a full multi-agent supervisor |
 | `06_streaming.py` | `graph.stream()` | Two stream modes side by side: `"updates"` (one event per finished node) and `"messages"` (LLM tokens as they're generated, across every node) |
+| `07_supervisor_agent.py` | supervisor multi-agent pattern | An LLM-based supervisor node classifies each question and routes it to one of three specialist workers (math, writing, general) via `add_conditional_edges` — the general version of `02_conditional_graph.py`'s hand-written rule |
 
 Needs the same Ollama setup as `06-agents/` (see its section above) — no API key. You'll see a
 harmless `LangChainPendingDeprecationWarning` about `allowed_objects` on every run; it comes
@@ -312,13 +313,14 @@ ai-engineering/                             # project root
 │   ├── 04_retriever_tool_agent_qorebit.py     # Qorebit
 │   ├── 05_multi_tool_agent.py                 # Ollama
 │   └── 05_multi_tool_agent_qorebit.py         # Qorebit
-├── 07-langgraph/                          # six LangGraph demos, see table above (needs Ollama)
+├── 07-langgraph/                          # seven LangGraph demos, see table above (needs Ollama)
 │   ├── 01_simple_graph.py
 │   ├── 02_conditional_graph.py
 │   ├── 03_tool_calling_agent.py
 │   ├── 04_persistent_memory.py
 │   ├── 05_multi_agent_graph.py
-│   └── 06_streaming.py
+│   ├── 06_streaming.py
+│   └── 07_supervisor_agent.py
 ├── rag-app/
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
