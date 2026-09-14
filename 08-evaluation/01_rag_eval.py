@@ -162,8 +162,8 @@ print_step(5, "Summary")
 print(f"Retrieval score: {retrieval_hits}/{len(EVAL_SET)} ({retrieval_score:.0%})")
 print(f"Answer score:    {answer_hits}/{len(EVAL_SET)} ({answer_score:.0%})")
 if answer_score < retrieval_score:
-    print("Answers lag retrieval — the chunks have the right info but generation drops it.")
+    print("Answers lag retrieval - the chunks have the right info but generation drops it.")
 elif answer_score > retrieval_score:
-    print("Answers beat retrieval — flan-t5 may be using pretrained knowledge, not just context.")
+    print("Answers beat retrieval - flan-t5 may be using pretrained knowledge, not just context.")
 else:
     print("Retrieval and answer quality match.")
