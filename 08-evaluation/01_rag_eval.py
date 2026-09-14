@@ -77,6 +77,9 @@ EVAL_SET = [
 
 
 def contains_any_keyword(text: str, keywords: list[str]) -> bool:
+    # Loose substring match, not exact match — flan-t5 rarely echoes back the
+    # exact expected phrasing, so this checks "did this touch the right
+    # topic" rather than scoring strict correctness.
     lowered = text.lower()
     return any(keyword.lower() in lowered for keyword in keywords)
 
