@@ -2,8 +2,8 @@
 
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
-memory, chain composition, prompting techniques, agents, and LangGraph. Every file runs on
-its own; none of the demo folders depend on each other.
+memory, chain composition, prompting techniques, agents, LangGraph, and RAG evaluation.
+Every file runs on its own; none of the demo folders depend on each other.
 
 ## RAG pipeline
 
@@ -246,6 +246,20 @@ Only `03_tool_calling_agent_qorebit.py` needs `disable_streaming=True`, for the 
 Qorebit twins either bind no tools or (in `06_streaming_qorebit.py`'s case) specifically need
 streaming left on to demonstrate `stream_mode="messages"`.
 
+## RAG evaluation demo
+
+Every earlier RAG demo prints one answer to one question and you eyeball whether it looks
+right. `08-evaluation/01_rag_eval.py` replaces eyeballing with a small, fixed eval set — five
+questions about `data/sample.txt`, each paired with keywords the correct answer should
+contain — checked automatically every run.
+
+It scores two layers separately: **retrieval** (did the vector store's top-`k` chunks contain
+the expected keywords, independent of the LLM?) and **answer** (did the final generated answer
+contain them too?). Splitting the two makes a failure diagnosable — a retrieval miss points at
+chunking/embedding/search, while a retrieval hit with an answer miss points at the prompt or
+the generation model instead. Runs entirely on the same free local Hugging Face embeddings +
+`flan-t5-base` + Chroma stack as `rag-app/rag_pipeline_huggingface.py` — no API key needed.
+
 ## Stack
 
 - **Document loading / chunking**: LangChain (`TextLoader` or `PyPDFLoader`, `RecursiveCharacterTextSplitter`)
@@ -334,6 +348,8 @@ ai-engineering/                             # project root
 │   ├── 06_streaming_qorebit.py
 │   ├── 07_supervisor_agent.py
 │   └── 07_supervisor_agent_qorebit.py
+├── 08-evaluation/                          # RAG eval harness, see section above
+│   └── 01_rag_eval.py
 ├── rag-app/
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
@@ -357,7 +373,8 @@ ai-engineering/                             # project root
     ├── agents_retriever_tool_qorebit/          # from 06-agents/04_retriever_tool_agent_qorebit.py
     ├── agents_multi_tool_qorebit/              # from 06-agents/05_multi_tool_agent_qorebit.py
     ├── langgraph_multi_agent/                  # from 07-langgraph/05_multi_agent_graph.py
-    └── langgraph_multi_agent_qorebit/          # from 07-langgraph/05_multi_agent_graph_qorebit.py
+    ├── langgraph_multi_agent_qorebit/          # from 07-langgraph/05_multi_agent_graph_qorebit.py
+    └── eval_rag/                                # from 08-evaluation/01_rag_eval.py
 ```
 
 ## Setup
@@ -472,15 +489,16 @@ python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QO
 ```
 
 The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `05-chains/`,
-`02-prompt-engineering/`, `06-agents/`, `07-langgraph/`) run the same way —
+`02-prompt-engineering/`, `06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
-everything in `04-memory/`, `05-chains/`, and `02-prompt-engineering/` that needs an LLM at
-all uses the free local `flan-t5-base` model, and most files in `06-agents/` and
-`07-langgraph/` use the free local Ollama model instead (see the setup steps above — Ollama
-is the one thing in this project that needs installing beyond `pip install`). The exception
-is each folder's `*_qorebit.py` files (four in `06-agents/`, five in `07-langgraph/`), which
-need `QOREBIT_API_KEY` and make a real, live Qorebit call every time you run them.
+everything in `04-memory/`, `05-chains/`, `02-prompt-engineering/`, and `08-evaluation/` that
+needs an LLM at all uses the free local `flan-t5-base` model, and most files in `06-agents/`
+and `07-langgraph/` use the free local Ollama model instead (see the setup steps above —
+Ollama is the one thing in this project that needs installing beyond `pip install`). The
+exception is each folder's `*_qorebit.py` files (four in `06-agents/`, five in
+`07-langgraph/`), which need `QOREBIT_API_KEY` and make a real, live Qorebit call every time
+you run them.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
