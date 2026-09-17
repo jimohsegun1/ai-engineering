@@ -14,3 +14,5 @@ beautifulsoup4==4.15.0
 numexpr==2.14.2
 langchain-ollama==0.3.10
 langgraph==0.3.34
+fastapi==0.141.1
+uvicorn==0.53.0

@@ -2,8 +2,8 @@
 
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
-memory, chain composition, prompting techniques, agents, LangGraph, and RAG evaluation.
-Every file runs on its own; none of the demo folders depend on each other.
+memory, chain composition, prompting techniques, agents, LangGraph, RAG evaluation, and
+deployment. Every file runs on its own; none of the demo folders depend on each other.
 
 ## RAG pipeline
 
@@ -260,6 +260,29 @@ chunking/embedding/search, while a retrieval hit with an answer miss points at t
 the generation model instead. Runs entirely on the same free local Hugging Face embeddings +
 `flan-t5-base` + Chroma stack as `rag-app/rag_pipeline_huggingface.py` — no API key needed.
 
+## Deployment demo
+
+Every earlier demo calls `graph.invoke(...)` or `chain.invoke(...)` once, in-process, then
+exits. `09-deployment/01_fastapi_agent_service.py` takes the supervisor graph from
+`07-langgraph/07_supervisor_agent.py` and wraps it in a small [FastAPI](https://fastapi.tiangolo.com/)
+app instead, so it runs as a long-lived HTTP service other programs can call:
+
+- `GET /health` — a plain liveness check
+- `POST /chat` — `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
+
+The graph (and its connection to Ollama) is built once at server startup rather than once per
+request. Needs the same Ollama setup as `07-langgraph/` — no API key.
+
+Run it, then call it from another terminal:
+
+```powershell
+python 09-deployment/01_fastapi_agent_service.py
+```
+
+```powershell
+curl -X POST http://127.0.0.1:8000/chat -H "Content-Type: application/json" -d "{\"question\": \"What is 24 times 7, plus 10?\"}"
+```
+
 ## Stack
 
 - **Document loading / chunking**: LangChain (`TextLoader` or `PyPDFLoader`, `RecursiveCharacterTextSplitter`)
@@ -350,6 +373,8 @@ ai-engineering/                             # project root
 │   └── 07_supervisor_agent_qorebit.py
 ├── 08-evaluation/                          # RAG eval harness, see section above
 │   └── 01_rag_eval.py
+├── 09-deployment/                          # FastAPI agent service, see section above
+│   └── 01_fastapi_agent_service.py           # needs Ollama
 ├── rag-app/
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
@@ -499,6 +524,11 @@ Ollama is the one thing in this project that needs installing beyond `pip instal
 exception is each folder's `*_qorebit.py` files (four in `06-agents/`, five in
 `07-langgraph/`), which need `QOREBIT_API_KEY` and make a real, live Qorebit call every time
 you run them.
+
+`09-deployment/01_fastapi_agent_service.py` is the one file that doesn't run once and exit —
+`python 09-deployment/01_fastapi_agent_service.py` starts a server that keeps running until you
+stop it (Ctrl+C), and you call it from another terminal instead (see its section above). It
+needs Ollama, same as `07-langgraph/`.
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
