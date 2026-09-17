@@ -17,27 +17,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Chunking methods | [`01-chunking-methods/`](01-chunking-methods/README.md) |
 | Prompt engineering | [`02-prompt-engineering/`](02-prompt-engineering/README.md) |
 | Document loaders | [`03-document-loaders/`](03-document-loaders/README.md) |
-
-## Memory demos
-
-`04-memory/` has five standalone files, each demonstrating a different LangChain conversation
-memory type. Unlike the other demo folders, these don't run a retrieval pipeline — they save
-a fixed script of conversation turns into memory and print what each type retains after
-every turn, so you can compare them directly:
-
-| File | Memory type | Needs an LLM? | What it shows |
-| --- | --- | --- | --- |
-| `01_buffer_memory.py` | `ConversationBufferMemory` | No | Keeps the full transcript verbatim — keeps growing forever |
-| `02_buffer_window_memory.py` | `ConversationBufferWindowMemory` | No | Keeps only the last `k` exchanges, drops everything older |
-| `03_summary_memory.py` | `ConversationSummaryMemory` | Yes (local flan-t5) | Rewrites the whole transcript into a running summary after every turn |
-| `04_summary_buffer_memory.py` | `ConversationSummaryBufferMemory` | Yes (local flan-t5) | Recent turns kept verbatim, older ones rolled into a summary once a token limit is hit |
-| `05_vectorstore_retriever_memory.py` | `VectorStoreRetrieverMemory` | No | Retrieves whichever *past* exchange is semantically closest to the new input, via Chroma |
-
-The two summary-based files use the same local `google/flan-t5-base` model as
-`rag_pipeline_huggingface.py`, so they run free with no API key. You'll see a
-`LangChainDeprecationWarning` when importing `langchain.memory` — these classes still work
-in LangChain 0.3.x, but upstream now recommends LangGraph-based persistence instead; harmless
-for this learning project.
+| Conversation memory | [`04-memory/`](04-memory/README.md) |
 
 ## Chain composition demos
 
@@ -227,7 +207,8 @@ ai-engineering/                             # project root
 │   ├── 04_json_loader.py
 │   ├── 05_directory_loader.py
 │   └── 06_web_loader.py
-├── 04-memory/                             # five conversation-memory demos, see table above
+├── 04-memory/                             # five conversation-memory demos, see its README
+│   ├── README.md
 │   ├── 01_buffer_memory.py
 │   ├── 02_buffer_window_memory.py
 │   ├── 03_summary_memory.py
@@ -413,11 +394,11 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The demo folders (`04-memory/`, `05-chains/`,
+The demo folders (`05-chains/`,
 `06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
-everything in `04-memory/`, `05-chains/`, and `08-evaluation/` that
+everything in `05-chains/` and `08-evaluation/` that
 needs an LLM at all uses the free local `flan-t5-base` model, and most files in `06-agents/`
 and `07-langgraph/` use the free local Ollama model instead (see the setup steps above —
 Ollama is the one thing in this project that needs installing beyond `pip install`). The
@@ -457,10 +438,6 @@ independently.
 - **Vector store resets on every run.** Every script deletes its own persisted Chroma
   folder under `db/` before rebuilding it, so re-running never duplicates chunks — it's not
   meant to persist across runs of a different document.
-- **`04-memory/`'s classic memory classes are deprecated but still functional.**
-  `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
-  import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
-  instead, but the classes still work fine for learning the underlying concepts.
 - **`flan-t5-base` is an unreliable model for `05-chains/`.** It's the same small (~250M
   parameter) model used in `rag_pipeline_huggingface.py`, chosen for being free and
   CPU-friendly, not for quality. Expect `05-chains/10_math_chain.py`'s expression parsing to
