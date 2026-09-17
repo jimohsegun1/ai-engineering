@@ -5,31 +5,17 @@ pipeline plus focused demo folders for document loaders, chunking methods, conve
 memory, chain composition, prompting techniques, agents, LangGraph, RAG evaluation, and
 deployment. Every file runs on its own; none of the demo folders depend on each other.
 
-## RAG pipeline
+## Concepts
 
-A minimal Retrieval-Augmented Generation (RAG) pipeline, with each of the six RAG steps
-clearly commented:
+Each concept has its own README with the full write-up (what it demonstrates, a per-file
+table, how to run it, and its own gotchas). This root README covers what's shared across all
+of them: the stack, project layout, one-time setup, and cross-cutting notes.
 
-1. Prepare input document
-2. Chunking
-3. Create embeddings
-4. Store embeddings in a vector database
-5. Similarity search
-6. RAG pipeline (retrieval + generation)
+| Concept | Folder |
+| --- | --- |
+| RAG pipeline | [`rag-app/`](rag-app/README.md) |
 
-There are **three versions of the pipeline** — same steps, same structure, different
-generation backend:
-
-| File | Generation (step 6) | Setup needed |
-| --- | --- | --- |
-| `rag_pipeline.py` | [Qorebit](https://qorebit.ai) — a hosted, OpenAI-compatible API | Qorebit API key in `.env` |
-| `rag_pipeline_huggingface.py` | `google/flan-t5-base`, run locally via `transformers` | None — no API key, no internet-dependent call |
-| `rag_pipeline_huggingface_hosted.py` | A larger model (`HuggingFaceH4/zephyr-7b-beta`) via Hugging Face's hosted Inference API | Hugging Face access token in `.env` |
-
-All three use the same free local Hugging Face model for embeddings (step 3):
-`sentence-transformers/all-MiniLM-L6-v2`.
-
-### Chunking method demos
+## Chunking method demos
 
 `01-chunking-methods/` has six standalone files, each demonstrating a different chunking
 (step 2) strategy — everything else about the pipeline stays the same. In every file, step
@@ -62,21 +48,6 @@ python 01_character_splitter.py
 ```
 Either way, the venv still needs to be active and `data/`/`db/` are always resolved
 relative to the project root, never relative to `01-chunking-methods/`.
-
-### PDF input demo
-
-`rag_pipeline_pdf.py` is the same six-step pipeline as `rag_pipeline.py`, but the input
-document is `data/sample.pdf` (a small 3-page PDF about vector databases) instead of a
-`.txt` file, loaded with `PyPDFLoader` instead of `TextLoader`. The key difference to
-notice: `PyPDFLoader` returns **one Document per PDF page** (each carrying a `page` number
-in its metadata) rather than a single Document for the whole file, so step 1 already
-produces multiple documents before chunking even runs — every chunk downstream also keeps
-track of which page it came from. Like the other files, step 6 (the Qorebit call) is
-commented out by default.
-
-```powershell
-python rag-app/rag_pipeline_pdf.py
-```
 
 ### Document loader demos
 
@@ -376,6 +347,7 @@ ai-engineering/                             # project root
 ├── 09-deployment/                          # FastAPI agent service, see section above
 │   └── 01_fastapi_agent_service.py           # needs Ollama
 ├── rag-app/
+│   ├── README.md                           # concept write-up: setup, running it, gotchas
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
 │   ├── rag_pipeline_huggingface_hosted.py  # HF hosted Inference API version, steps 1-6
@@ -504,14 +476,8 @@ only placeholders and is safe to commit.
 ## Running it
 
 Make sure your virtual environment is activated (prompt shows `(venv)`) and you're in the
-project root, then run whichever version you want:
-
-```powershell
-python rag-app/rag_pipeline.py                          # Qorebit — needs QOREBIT_API_KEY in .env
-python rag-app/rag_pipeline_huggingface.py              # fully local — no setup needed beyond step 4
-python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — needs HUGGINGFACEHUB_API_TOKEN in .env
-python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
-```
+project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline's exact run
+commands and setup per version.
 
 The demo folders (`01-chunking-methods/`, `03-document-loaders/`, `04-memory/`, `05-chains/`,
 `02-prompt-engineering/`, `06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
@@ -537,8 +503,7 @@ finally the generated answer.
 The first run of any script downloads its models (a few hundred MB for embeddings, plus
 ~930MB more for `flan-t5-base` if you run the fully-local Hugging Face version) and caches
 them locally in `~/.cache/huggingface` — later runs are fast, since nothing needs to be
-re-downloaded. `rag_pipeline_huggingface_hosted.py` doesn't download a generation model at
-all, since that model runs on Hugging Face's servers, not yours.
+re-downloaded.
 
 ## Trying your own questions
 
@@ -558,34 +523,6 @@ independently.
 - **Vector store resets on every run.** Every script deletes its own persisted Chroma
   folder under `db/` before rebuilding it, so re-running never duplicates chunks — it's not
   meant to persist across runs of a different document.
-- **Custom headers for Qorebit.** In `rag_pipeline.py`, the `ChatOpenAI` client is
-  configured with a custom `User-Agent` header, because Qorebit's WAF blocks the default
-  User-Agent string sent by the `openai` Python SDK. `HTTP-Referer` / `X-Title` are also
-  sent, matching Qorebit's docs.
-- **Embeddings and generation use different providers in `rag_pipeline.py`.** Qorebit's
-  docs only cover chat completions, not embeddings, so step 3 uses a free local model
-  instead of calling Qorebit for that step.
-- **`rag_pipeline_huggingface.py`'s answers are noticeably weaker.** `google/flan-t5-base`
-  is a small (~250M parameter) model chosen so it runs on CPU with no GPU and no API key.
-  Its answers lean extractive (echoing context almost verbatim, sometimes truncated) rather
-  than genuinely composing a response. Swap `CHAT_MODEL` for a larger instruction-tuned
-  model if you have the hardware and want better quality.
-- **`rag_pipeline_huggingface_hosted.py` needs a fine-grained token.** A basic "Read"
-  access token isn't enough — create one at
-  [huggingface.co/settings/tokens/new?tokenType=fineGrained](https://huggingface.co/settings/tokens/new?tokenType=fineGrained)
-  with the **"Make calls to Inference Providers"** permission checked, or every request
-  fails with a 403 ("This authentication method does not have sufficient permissions...").
-- **`rag_pipeline_huggingface_hosted.py` depends on Hugging Face's Inference API
-  availability and quota.** Unlike the other two files, this one calls a remote service
-  (here, routed to the `featherless-ai` provider), so it can hit the same class of issue we
-  saw with other hosted providers:
-  - Occasional `503 "temporarily at capacity"` errors for a given model — the script
-    retries automatically a few times before giving up.
-  - Free accounts get a small monthly credit allowance for Inference Providers; once it's
-    used up you'll get `402 Payment Required` until it resets next month, or until you add
-    pre-paid credits / a PRO subscription at huggingface.co/settings/billing.
-  - If `CHAT_MODEL` itself stops being available, swap it for another instruction-tuned
-    model that supports Hugging Face's hosted inference.
 - **`05_semantic_chunker.py`'s default threshold is tuned for long documents.**
   `SemanticChunker`'s default `breakpoint_threshold_amount` (95th percentile) only treats
   the single most extreme meaning-shift as a split point, which collapses a short document
