@@ -16,27 +16,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | RAG pipeline | [`rag-app/`](rag-app/README.md) |
 | Chunking methods | [`01-chunking-methods/`](01-chunking-methods/README.md) |
 | Prompt engineering | [`02-prompt-engineering/`](02-prompt-engineering/README.md) |
-
-## Document loader demos
-
-`03-document-loaders/` has six standalone files, each demonstrating a different LangChain
-document loader (step 1) — everything else about the pipeline (or, for the smaller formats,
-what's left of it) stays the same. Step 6 (the Qorebit call) is commented out in every file,
-same as `01-chunking-methods/`:
-
-| File | Loader | Input | What it shows |
-| --- | --- | --- | --- |
-| `01_text_loader.py` | `TextLoader` | `data/sample.txt` | The baseline: one Document for a whole plain-text file |
-| `02_pdf_loader.py` | `PyPDFLoader` | `data/sample.pdf` | One Document per PDF page, with a `page` number in metadata |
-| `03_csv_loader.py` | `CSVLoader` | `data/sample.csv` | One Document per row, formatted as `column: value` lines |
-| `04_json_loader.py` | `JSONLoader` | `data/sample.json` | Pulls one Document per array element out of nested JSON with a jq schema |
-| `05_directory_loader.py` | `DirectoryLoader` | `data/sample.txt` + `data/sample2.txt` | Loads every file matching a glob pattern in one call, instead of naming files one by one |
-| `06_web_loader.py` | `WebBaseLoader` | a live web page | The only loader here that needs internet access, parsed with BeautifulSoup |
-
-For the row/record-shaped formats (CSV, JSON) chunking is skipped entirely — each row or
-record is already a small, self-contained unit of text, so step 2 just passes the documents
-through as-is. Run these the same way as `01-chunking-methods/`, either from the project root
-or from inside `03-document-loaders/` itself.
+| Document loaders | [`03-document-loaders/`](03-document-loaders/README.md) |
 
 ## Memory demos
 
@@ -239,7 +219,8 @@ ai-engineering/                             # project root
 │   ├── 04_markdown_header_splitter.py
 │   ├── 05_semantic_chunker.py
 │   └── 06_code_splitter.py
-├── 03-document-loaders/                      # six document-loader demos, see table above
+├── 03-document-loaders/                      # six document-loader demos, see its README
+│   ├── README.md
 │   ├── 01_text_loader.py
 │   ├── 02_pdf_loader.py
 │   ├── 03_csv_loader.py
@@ -432,7 +413,7 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The demo folders (`03-document-loaders/`, `04-memory/`, `05-chains/`,
+The demo folders (`04-memory/`, `05-chains/`,
 `06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
@@ -476,13 +457,6 @@ independently.
 - **Vector store resets on every run.** Every script deletes its own persisted Chroma
   folder under `db/` before rebuilding it, so re-running never duplicates chunks — it's not
   meant to persist across runs of a different document.
-- **`03-document-loaders/04_json_loader.py` needs the `jq` package.** `JSONLoader` uses jq
-  schemas to pull data out of nested JSON, so it depends on the `jq` Python bindings
-  (in `requirements.txt`) rather than just `langchain-community`.
-- **`03-document-loaders/06_web_loader.py` needs internet access and `beautifulsoup4`.** It's
-  the only loader demo that calls out to a live URL instead of reading a local file. It also
-  sets a `USER_AGENT` environment variable to avoid a harmless warning some sites' servers
-  trigger when it's unset.
 - **`04-memory/`'s classic memory classes are deprecated but still functional.**
   `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
   import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
