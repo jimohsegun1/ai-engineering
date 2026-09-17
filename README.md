@@ -15,6 +15,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | --- | --- |
 | RAG pipeline | [`rag-app/`](rag-app/README.md) |
 | Chunking methods | [`01-chunking-methods/`](01-chunking-methods/README.md) |
+| Prompt engineering | [`02-prompt-engineering/`](02-prompt-engineering/README.md) |
 
 ## Document loader demos
 
@@ -78,24 +79,6 @@ document/retrieval/utility chain constructors. All eleven run on the local, free
 | `09_retrieval_chain.py` | `create_retrieval_chain` | The modern replacement for the legacy `RetrievalQA` chain — retriever + stuff-documents chain in one call |
 | `10_math_chain.py` | `LLMMathChain` | The LLM writes a Python expression for a word problem, then `numexpr` evaluates it instead of trusting the model's arithmetic |
 | `11_conversational_retrieval_chain.py` | `create_history_aware_retriever` + `create_retrieval_chain` | A RAG chain with memory — rewrites a vague follow-up ("why is it useful?") into a standalone question using chat history *before* retrieving; the modern replacement for the legacy `ConversationalRetrievalChain` |
-
-## Prompt engineering demos
-
-`02-prompt-engineering/` has five standalone files, each demonstrating a different prompting
-technique on the same local `google/flan-t5-base` model:
-
-| File | Technique | What it shows |
-| --- | --- | --- |
-| `01_zero_shot_prompting.py` | Zero-shot | Just an instruction, no examples of the desired output |
-| `02_few_shot_prompting.py` | Few-shot (`FewShotPromptTemplate`) | A handful of labeled examples before the real question — compare with the file above |
-| `03_chain_of_thought_prompting.py` | Chain-of-thought | Asking the model to reason step by step, compared against a direct-answer prompt on the same question |
-| `04_role_based_prompting.py` | Role-based | The same question answered twice, once per assigned persona |
-| `05_structured_output_prompting.py` | Structured output (`PydanticOutputParser`) | Asks for JSON matching a schema, and handles the (likely) case where a small model doesn't follow it |
-
-`flan-t5-base` is small enough to be an unreliable narrator for some of these — chain-of-thought
-answers can loop or drift, and structured-output parsing often fails outright. That's noted in
-each file and is expected; the point is to see the prompting mechanics work, not to get
-perfect answers out of a ~250M parameter model.
 
 ## Agent demos
 
@@ -281,7 +264,8 @@ ai-engineering/                             # project root
 │   ├── 09_retrieval_chain.py
 │   ├── 10_math_chain.py
 │   └── 11_conversational_retrieval_chain.py
-├── 02-prompt-engineering/                    # five prompting-technique demos, see table above
+├── 02-prompt-engineering/                    # five prompting-technique demos, see its README
+│   ├── README.md
 │   ├── 01_zero_shot_prompting.py
 │   ├── 02_few_shot_prompting.py
 │   ├── 03_chain_of_thought_prompting.py
@@ -449,10 +433,10 @@ commands and setup per version, and [`01-chunking-methods/README.md`](01-chunkin
 for the chunking demos'.
 
 The demo folders (`03-document-loaders/`, `04-memory/`, `05-chains/`,
-`02-prompt-engineering/`, `06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
+`06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
-everything in `04-memory/`, `05-chains/`, `02-prompt-engineering/`, and `08-evaluation/` that
+everything in `04-memory/`, `05-chains/`, and `08-evaluation/` that
 needs an LLM at all uses the free local `flan-t5-base` model, and most files in `06-agents/`
 and `07-langgraph/` use the free local Ollama model instead (see the setup steps above —
 Ollama is the one thing in this project that needs installing beyond `pip install`). The
@@ -503,12 +487,11 @@ independently.
   `langchain.memory` (used by all five files) prints a `LangChainDeprecationWarning` on
   import in LangChain 0.3.x — upstream now points toward LangGraph-based persistence
   instead, but the classes still work fine for learning the underlying concepts.
-- **`flan-t5-base` is an unreliable model for `05-chains/` and `02-prompt-engineering/`.** It's
-  the same small (~250M parameter) model used in `rag_pipeline_huggingface.py`, chosen for
-  being free and CPU-friendly, not for quality. Expect chain-of-thought answers to sometimes
-  loop or drift, and expect `05_structured_output_prompting.py`'s JSON parsing and
-  `05-chains/10_math_chain.py`'s expression parsing to fail more often than they succeed —
-  all three files handle that gracefully rather than assuming success.
+- **`flan-t5-base` is an unreliable model for `05-chains/`.** It's the same small (~250M
+  parameter) model used in `rag_pipeline_huggingface.py`, chosen for being free and
+  CPU-friendly, not for quality. Expect `05-chains/10_math_chain.py`'s expression parsing to
+  fail more often than it succeeds — the file handles that gracefully rather than assuming
+  success.
 - **`05-chains/10_math_chain.py` needs the `numexpr` package.** `LLMMathChain` evaluates the
   expression the LLM writes with `numexpr` rather than Python's own `eval`, so it depends on
   `numexpr` (in `requirements.txt`) in addition to `langchain`.
