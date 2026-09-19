@@ -19,62 +19,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Document loaders | [`03-document-loaders/`](03-document-loaders/README.md) |
 | Conversation memory | [`04-memory/`](04-memory/README.md) |
 | Chain composition | [`05-chains/`](05-chains/README.md) |
-
-## Agent demos
-
-Unlike a chain, an agent doesn't follow a fixed sequence — the LLM decides at each turn
-whether to call a tool or give a final answer, based on its own reasoning. `06-agents/` has
-nine standalone files: five run on [Ollama](https://ollama.com) (`llama3.2:3b`, local and
-free) and four of those five have a Qorebit-backed twin (`_qorebit.py` suffix) using
-`gpt-4o`, so you can directly compare a small local model against a larger hosted one on the
-exact same task. This is the one folder that **doesn't** use `flan-t5-base` — reliable tool
-use needs a real instruction-tuned model:
-
-| File | Pattern | What it shows |
-| --- | --- | --- |
-| `01_react_agent.py` / `_qorebit.py` | `create_react_agent` (ReAct) | The classic text-based Thought/Action/Observation loop — brittle on llama3.2:3b, works (after retries) on gpt-4o, see the notes below |
-| `02_custom_tools.py` | `@tool` | How a plain Python function becomes something an agent can be told about and call — no LLM involved, no Qorebit twin needed |
-| `03_tool_calling_agent.py` / `_qorebit.py` | `create_tool_calling_agent` | The modern replacement for ReAct: the model returns a structured tool call directly instead of text to parse |
-| `04_retriever_tool_agent.py` / `_qorebit.py` | `create_retriever_tool` | Wraps a Chroma retriever as a tool so the agent decides for itself whether a question needs a document lookup |
-| `05_multi_tool_agent.py` / `_qorebit.py` | multiple tools on one agent | A calculator, a word counter, and a retriever together — asks several questions to see which tool (if any) gets picked each time |
-
-**Ollama setup** (only needed for the non-`_qorebit.py` files):
-1. Install [Ollama](https://ollama.com/download) (or `winget install Ollama.Ollama` on Windows) — it runs as a local background service.
-2. Pull the model this folder uses: `ollama pull llama3.2:3b` (~2GB download, one-time).
-3. That's it — no API key, and `langchain-ollama` is already in `requirements.txt`.
-
-**The `_qorebit.py` files make live Qorebit calls, unlike the rest of this project's Qorebit
-usage.** Every other Qorebit-touching file comments out the actual API call by default so you
-can read/run the free steps and opt in to spending credits — but an agent demo has no free
-partial run to fall back to, the whole point is invoking the LLM, so these run live every
-time. They need `QOREBIT_API_KEY` in `.env`, same as `rag_pipeline.py`.
-
-**`01_react_agent.py` vs. `01_react_agent_qorebit.py` — a real before/after.** llama3.2:3b
-often computes the correct answer via the calculator tool — repeatedly — but never actually
-writes the `Final Answer:` line the ReAct parser is watching for, so it loops until
-`max_iterations` (set to 5) cuts it off and returns "Agent stopped due to iteration limit."
-gpt-4o via Qorebit does reach the correct final answer, but not cleanly on the first try
-either: it tends to write out the whole Thought/Action/Observation/Final Answer sequence in
-one go, predicting the tool's result instead of waiting for it — `handle_parsing_errors=True`
-catches this and retries until the model settles into the correct format. Both are real,
-reproducible behaviors, not bugs in the code; that's exactly why `03_tool_calling_agent.py`
-exists — the same kind of task works cleanly on both models once native tool-calling is used
-instead of text parsing.
-
-**`04_retriever_tool_agent.py` vs. its Qorebit twin** shows the same gap: llama3.2:3b
-sometimes calls the retriever tool for a question that doesn't need it, or even invents an
-unavailable tool name, instead of just answering directly — gpt-4o reliably calls the
-retriever only for the on-topic question and answers the other one directly with no tool call
-at all.
-
-**The three `_qorebit.py` files that use `create_tool_calling_agent` need
-`disable_streaming=True` on the LLM.** `AgentExecutor` streams the model's response
-internally to plan each step, and Qorebit's gateway mangles the `tool_call` id field when a
-tool-calling response is streamed — it comes back hundreds of characters long instead of a
-normal short id, and the next request then fails with a 400 ("string too long"). Disabling
-streaming makes the client request the full response in one piece instead, which avoids the
-bug entirely. `01_react_agent_qorebit.py` doesn't need this flag, since ReAct's plain-text
-format never involves a `tool_call` id in the first place.
+| Agents | [`06-agents/`](06-agents/README.md) |
 
 ## LangGraph demos
 
@@ -95,7 +40,7 @@ free), and five of those seven (every file with an LLM in it) have a Qorebit-bac
 | `06_streaming.py` / `_qorebit.py` | `graph.stream()` | Two stream modes side by side: `"updates"` (one event per finished node) and `"messages"` (LLM tokens as they're generated, across every node) |
 | `07_supervisor_agent.py` / `_qorebit.py` | supervisor multi-agent pattern | An LLM-based supervisor node classifies each question and routes it to one of three specialist workers (math, writing, general) via `add_conditional_edges` — the general version of `02_conditional_graph.py`'s hand-written rule |
 
-Needs the same Ollama setup as `06-agents/` (see its section above) — no API key. You'll see a
+Needs the same Ollama setup as [`06-agents/`](06-agents/README.md) — no API key. You'll see a
 harmless `LangChainPendingDeprecationWarning` about `allowed_objects` on every run; it comes
 from LangGraph's own checkpoint-serialization internals, not from anything in these files, and
 doesn't affect the output.
@@ -103,9 +48,9 @@ doesn't affect the output.
 **The `_qorebit.py` files make live Qorebit calls**, same as `06-agents/`'s twins — no free
 partial run to fall back to, so they run live every time and need `QOREBIT_API_KEY` in `.env`.
 Only `03_tool_calling_agent_qorebit.py` needs `disable_streaming=True`, for the same
-`tool_call`-id-mangling reason documented in the Agent demos section above — the other four
-Qorebit twins either bind no tools or (in `06_streaming_qorebit.py`'s case) specifically need
-streaming left on to demonstrate `stream_mode="messages"`.
+`tool_call`-id-mangling reason documented in [`06-agents/README.md`](06-agents/README.md) —
+the other four Qorebit twins either bind no tools or (in `06_streaming_qorebit.py`'s case)
+specifically need streaming left on to demonstrate `stream_mode="messages"`.
 
 ## RAG evaluation demo
 
@@ -214,7 +159,8 @@ ai-engineering/                             # project root
 │   ├── 03_chain_of_thought_prompting.py
 │   ├── 04_role_based_prompting.py
 │   └── 05_structured_output_prompting.py
-├── 06-agents/                             # nine agent demos, see table above
+├── 06-agents/                             # nine agent demos, see its README
+│   ├── README.md
 │   ├── 01_react_agent.py                     # Ollama
 │   ├── 01_react_agent_qorebit.py             # Qorebit
 │   ├── 02_custom_tools.py                    # no LLM
@@ -341,7 +287,8 @@ Most of this project needs no API key at all: every demo folder
 (`01-chunking-methods/`, `02-prompt-engineering/`, `03-document-loaders/`, `04-memory/`,
 `05-chains/`) and `rag_pipeline_huggingface.py` run on free local models, and so do the
 non-`_qorebit.py` files in `06-agents/` and `07-langgraph/` (they use Ollama instead — see
-its own setup steps in that section). Skip this step entirely unless you plan to run
+[`06-agents/README.md`](06-agents/README.md) for its setup steps). Skip this step entirely
+unless you plan to run
 `rag_pipeline.py`, `rag_pipeline_pdf.py`, `rag_pipeline_huggingface_hosted.py`, or one of the
 `_qorebit.py` files in `06-agents/` or `07-langgraph/`.
 
@@ -375,16 +322,15 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The demo folders (`06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
+The demo folders (`07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
 everything in `08-evaluation/` that needs an LLM at all uses the free local `flan-t5-base`
-model, and most files in `06-agents/`
-and `07-langgraph/` use the free local Ollama model instead (see the setup steps above —
-Ollama is the one thing in this project that needs installing beyond `pip install`). The
-exception is each folder's `*_qorebit.py` files (four in `06-agents/`, five in
-`07-langgraph/`), which need `QOREBIT_API_KEY` and make a real, live Qorebit call every time
-you run them.
+model, and most files in `07-langgraph/` use the free local Ollama model instead (see
+[`06-agents/README.md`](06-agents/README.md) for the Ollama setup steps — Ollama is the one
+thing in this project that needs installing beyond `pip install`). The exception is each
+folder's `*_qorebit.py` files (five in `07-langgraph/`), which need `QOREBIT_API_KEY` and
+make a real, live Qorebit call every time you run them.
 
 `09-deployment/01_fastapi_agent_service.py` is the one file that doesn't run once and exit —
 `python 09-deployment/01_fastapi_agent_service.py` starts a server that keeps running until you
