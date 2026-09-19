@@ -18,27 +18,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Prompt engineering | [`02-prompt-engineering/`](02-prompt-engineering/README.md) |
 | Document loaders | [`03-document-loaders/`](03-document-loaders/README.md) |
 | Conversation memory | [`04-memory/`](04-memory/README.md) |
-
-## Chain composition demos
-
-`05-chains/` has eleven standalone files, each demonstrating a different way to compose
-chains together — five general LCEL composition patterns, plus six of LangChain's dedicated
-document/retrieval/utility chain constructors. All eleven run on the local, free
-`google/flan-t5-base` model, so there's no Qorebit step to comment out here:
-
-| File | Pattern | What it shows |
-| --- | --- | --- |
-| `01_simple_chain.py` | `prompt \| llm \| output_parser` | The basic three-piece chain shape every other file builds on |
-| `02_sequential_chain.py` | `RunnablePassthrough.assign` | Feeds one chain's output into a second chain's input, keeping every intermediate value |
-| `03_parallel_chain.py` | `RunnableParallel` | Runs two independent chains against the same input at once instead of one after another |
-| `04_router_chain.py` | `RunnableBranch` | Sends an input down one of several chains depending on a condition |
-| `05_transform_chain.py` | `RunnableLambda` | A plain-Python transform step inserted into a chain — not every step has to call an LLM |
-| `06_stuff_documents_chain.py` | `create_stuff_documents_chain` | The official building block for the "concatenate every doc into one prompt" pattern rag-app builds by hand |
-| `07_map_reduce_chain.py` | `load_summarize_chain(chain_type="map_reduce")` | Summarizes each document independently, then combines those summaries into one |
-| `08_refine_chain.py` | `load_summarize_chain(chain_type="refine")` | Processes documents one at a time, refining a running summary instead of combining independent ones |
-| `09_retrieval_chain.py` | `create_retrieval_chain` | The modern replacement for the legacy `RetrievalQA` chain — retriever + stuff-documents chain in one call |
-| `10_math_chain.py` | `LLMMathChain` | The LLM writes a Python expression for a word problem, then `numexpr` evaluates it instead of trusting the model's arithmetic |
-| `11_conversational_retrieval_chain.py` | `create_history_aware_retriever` + `create_retrieval_chain` | A RAG chain with memory — rewrites a vague follow-up ("why is it useful?") into a standalone question using chat history *before* retrieving; the modern replacement for the legacy `ConversationalRetrievalChain` |
+| Chain composition | [`05-chains/`](05-chains/README.md) |
 
 ## Agent demos
 
@@ -214,7 +194,8 @@ ai-engineering/                             # project root
 │   ├── 03_summary_memory.py
 │   ├── 04_summary_buffer_memory.py
 │   └── 05_vectorstore_retriever_memory.py
-├── 05-chains/                             # eleven chain-composition demos, see table above
+├── 05-chains/                             # eleven chain-composition demos, see its README
+│   ├── README.md
 │   ├── 01_simple_chain.py
 │   ├── 02_sequential_chain.py
 │   ├── 03_parallel_chain.py
@@ -394,12 +375,11 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The demo folders (`05-chains/`,
-`06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
+The demo folders (`06-agents/`, `07-langgraph/`, `08-evaluation/`) run the same way —
 `python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
 of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
-everything in `05-chains/` and `08-evaluation/` that
-needs an LLM at all uses the free local `flan-t5-base` model, and most files in `06-agents/`
+everything in `08-evaluation/` that needs an LLM at all uses the free local `flan-t5-base`
+model, and most files in `06-agents/`
 and `07-langgraph/` use the free local Ollama model instead (see the setup steps above —
 Ollama is the one thing in this project that needs installing beyond `pip install`). The
 exception is each folder's `*_qorebit.py` files (four in `06-agents/`, five in
@@ -438,14 +418,6 @@ independently.
 - **Vector store resets on every run.** Every script deletes its own persisted Chroma
   folder under `db/` before rebuilding it, so re-running never duplicates chunks — it's not
   meant to persist across runs of a different document.
-- **`flan-t5-base` is an unreliable model for `05-chains/`.** It's the same small (~250M
-  parameter) model used in `rag_pipeline_huggingface.py`, chosen for being free and
-  CPU-friendly, not for quality. Expect `05-chains/10_math_chain.py`'s expression parsing to
-  fail more often than it succeeds — the file handles that gracefully rather than assuming
-  success.
-- **`05-chains/10_math_chain.py` needs the `numexpr` package.** `LLMMathChain` evaluates the
-  expression the LLM writes with `numexpr` rather than Python's own `eval`, so it depends on
-  `numexpr` (in `requirements.txt`) in addition to `langchain`.
 - **`langchain` and `langchain-community` are pinned newer than you might expect (0.3.30 /
   0.3.15, not the original 0.3.7).** `langchain-ollama` needs a `langchain-core` recent
   enough that its own `langsmith` floor no longer fits under the old `langchain==0.3.7`'s
