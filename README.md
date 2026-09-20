@@ -21,20 +21,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Chain composition | [`05-chains/`](05-chains/README.md) |
 | Agents | [`06-agents/`](06-agents/README.md) |
 | LangGraph | [`07-langgraph/`](07-langgraph/README.md) |
-
-## RAG evaluation demo
-
-Every earlier RAG demo prints one answer to one question and you eyeball whether it looks
-right. `08-evaluation/01_rag_eval.py` replaces eyeballing with a small, fixed eval set — five
-questions about `data/sample.txt`, each paired with keywords the correct answer should
-contain — checked automatically every run.
-
-It scores two layers separately: **retrieval** (did the vector store's top-`k` chunks contain
-the expected keywords, independent of the LLM?) and **answer** (did the final generated answer
-contain them too?). Splitting the two makes a failure diagnosable — a retrieval miss points at
-chunking/embedding/search, while a retrieval hit with an answer miss points at the prompt or
-the generation model instead. Runs entirely on the same free local Hugging Face embeddings +
-`flan-t5-base` + Chroma stack as `rag-app/rag_pipeline_huggingface.py` — no API key needed.
+| RAG evaluation | [`08-evaluation/`](08-evaluation/README.md) |
 
 ## Deployment demo
 
@@ -154,7 +141,8 @@ ai-engineering/                             # project root
 │   ├── 06_streaming_qorebit.py
 │   ├── 07_supervisor_agent.py
 │   └── 07_supervisor_agent_qorebit.py
-├── 08-evaluation/                          # RAG eval harness, see section above
+├── 08-evaluation/                          # RAG eval harness, see its README
+│   ├── README.md
 │   └── 01_rag_eval.py
 ├── 09-deployment/                          # FastAPI agent service, see section above
 │   └── 01_fastapi_agent_service.py           # needs Ollama
@@ -293,10 +281,7 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The `08-evaluation/` folder runs the same way —
-`python <folder>/<file>.py` from the project root, or `cd` into the folder first. It needs
-no API key: its one LLM-backed file uses the free local `flan-t5-base` model. Ollama is the
-one thing in this project that needs installing beyond `pip install` — see
+Ollama is the one thing in this project that needs installing beyond `pip install` — see
 [`06-agents/README.md`](06-agents/README.md) for the setup steps.
 
 `09-deployment/01_fastapi_agent_service.py` is the one file that doesn't run once and exit —
