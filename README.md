@@ -20,37 +20,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Conversation memory | [`04-memory/`](04-memory/README.md) |
 | Chain composition | [`05-chains/`](05-chains/README.md) |
 | Agents | [`06-agents/`](06-agents/README.md) |
-
-## LangGraph demos
-
-`06-agents/` builds agents by hand with the older `AgentExecutor`. LangGraph is the newer,
-more general framework underneath: instead of a fixed agent loop, you define a graph of nodes
-that read and write a shared state, and LangGraph handles running it. `07-langgraph/` has
-twelve standalone files: seven run on [Ollama](https://ollama.com) (`llama3.2:3b`, local and
-free), and five of those seven (every file with an LLM in it) have a Qorebit-backed twin
-(`_qorebit.py` suffix) using `gpt-4o`, the same comparison `06-agents/` sets up:
-
-| File | Concept | What it shows |
-| --- | --- | --- |
-| `01_simple_graph.py` | `StateGraph`, nodes, edges | The fundamental mechanic — two plain-function nodes run in sequence, no LLM at all, no Qorebit twin needed |
-| `02_conditional_graph.py` | `add_conditional_edges` | Routes to one of two nodes based on a rule — the graph-based equivalent of `05-chains/04_router_chain.py` — no LLM, no Qorebit twin needed |
-| `03_tool_calling_agent.py` / `_qorebit.py` | `langgraph.prebuilt.create_react_agent` | The same tool-calling agent as `06-agents/03_tool_calling_agent.py`, built in one call instead of assembling a prompt + executor by hand |
-| `04_persistent_memory.py` / `_qorebit.py` | `MemorySaver` checkpointer + `thread_id` | The agent remembers earlier turns automatically — the modern replacement for wrapping `04-memory/`'s memory classes around an agent |
-| `05_multi_agent_graph.py` / `_qorebit.py` | multiple specialized nodes | A retriever-only "researcher" node feeds an LLM-backed "writer" node — a basic multi-node composition, one step short of a full multi-agent supervisor |
-| `06_streaming.py` / `_qorebit.py` | `graph.stream()` | Two stream modes side by side: `"updates"` (one event per finished node) and `"messages"` (LLM tokens as they're generated, across every node) |
-| `07_supervisor_agent.py` / `_qorebit.py` | supervisor multi-agent pattern | An LLM-based supervisor node classifies each question and routes it to one of three specialist workers (math, writing, general) via `add_conditional_edges` — the general version of `02_conditional_graph.py`'s hand-written rule |
-
-Needs the same Ollama setup as [`06-agents/`](06-agents/README.md) — no API key. You'll see a
-harmless `LangChainPendingDeprecationWarning` about `allowed_objects` on every run; it comes
-from LangGraph's own checkpoint-serialization internals, not from anything in these files, and
-doesn't affect the output.
-
-**The `_qorebit.py` files make live Qorebit calls**, same as `06-agents/`'s twins — no free
-partial run to fall back to, so they run live every time and need `QOREBIT_API_KEY` in `.env`.
-Only `03_tool_calling_agent_qorebit.py` needs `disable_streaming=True`, for the same
-`tool_call`-id-mangling reason documented in [`06-agents/README.md`](06-agents/README.md) —
-the other four Qorebit twins either bind no tools or (in `06_streaming_qorebit.py`'s case)
-specifically need streaming left on to demonstrate `stream_mode="messages"`.
+| LangGraph | [`07-langgraph/`](07-langgraph/README.md) |
 
 ## RAG evaluation demo
 
@@ -77,7 +47,7 @@ app instead, so it runs as a long-lived HTTP service other programs can call:
 - `POST /chat` — `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
 
 The graph (and its connection to Ollama) is built once at server startup rather than once per
-request. Needs the same Ollama setup as `07-langgraph/` — no API key.
+request. Needs the same Ollama setup as [`07-langgraph/`](07-langgraph/README.md) — no API key.
 
 Run it, then call it from another terminal:
 
@@ -170,7 +140,8 @@ ai-engineering/                             # project root
 │   ├── 04_retriever_tool_agent_qorebit.py     # Qorebit
 │   ├── 05_multi_tool_agent.py                 # Ollama
 │   └── 05_multi_tool_agent_qorebit.py         # Qorebit
-├── 07-langgraph/                          # twelve LangGraph demos, see table above (needs Ollama)
+├── 07-langgraph/                          # twelve LangGraph demos, see its README (needs Ollama)
+│   ├── README.md
 │   ├── 01_simple_graph.py
 │   ├── 02_conditional_graph.py
 │   ├── 03_tool_calling_agent.py
@@ -322,20 +293,16 @@ project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline'
 commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
 for the chunking demos'.
 
-The demo folders (`07-langgraph/`, `08-evaluation/`) run the same way —
-`python <folder>/<file>.py` from the project root, or `cd` into the folder first. Almost none
-of them need an API key: the RAG-style ones use Qorebit only for the commented-out step 6,
-everything in `08-evaluation/` that needs an LLM at all uses the free local `flan-t5-base`
-model, and most files in `07-langgraph/` use the free local Ollama model instead (see
-[`06-agents/README.md`](06-agents/README.md) for the Ollama setup steps — Ollama is the one
-thing in this project that needs installing beyond `pip install`). The exception is each
-folder's `*_qorebit.py` files (five in `07-langgraph/`), which need `QOREBIT_API_KEY` and
-make a real, live Qorebit call every time you run them.
+The `08-evaluation/` folder runs the same way —
+`python <folder>/<file>.py` from the project root, or `cd` into the folder first. It needs
+no API key: its one LLM-backed file uses the free local `flan-t5-base` model. Ollama is the
+one thing in this project that needs installing beyond `pip install` — see
+[`06-agents/README.md`](06-agents/README.md) for the setup steps.
 
 `09-deployment/01_fastapi_agent_service.py` is the one file that doesn't run once and exit —
 `python 09-deployment/01_fastapi_agent_service.py` starts a server that keeps running until you
 stop it (Ctrl+C), and you call it from another terminal instead (see its section above). It
-needs Ollama, same as `07-langgraph/`.
+needs Ollama, same as [`07-langgraph/`](07-langgraph/README.md).
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
