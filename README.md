@@ -22,29 +22,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Agents | [`06-agents/`](06-agents/README.md) |
 | LangGraph | [`07-langgraph/`](07-langgraph/README.md) |
 | RAG evaluation | [`08-evaluation/`](08-evaluation/README.md) |
-
-## Deployment demo
-
-Every earlier demo calls `graph.invoke(...)` or `chain.invoke(...)` once, in-process, then
-exits. `09-deployment/01_fastapi_agent_service.py` takes the supervisor graph from
-`07-langgraph/07_supervisor_agent.py` and wraps it in a small [FastAPI](https://fastapi.tiangolo.com/)
-app instead, so it runs as a long-lived HTTP service other programs can call:
-
-- `GET /health` — a plain liveness check
-- `POST /chat` — `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
-
-The graph (and its connection to Ollama) is built once at server startup rather than once per
-request. Needs the same Ollama setup as [`07-langgraph/`](07-langgraph/README.md) — no API key.
-
-Run it, then call it from another terminal:
-
-```powershell
-python 09-deployment/01_fastapi_agent_service.py
-```
-
-```powershell
-curl -X POST http://127.0.0.1:8000/chat -H "Content-Type: application/json" -d "{\"question\": \"What is 24 times 7, plus 10?\"}"
-```
+| Deployment | [`09-deployment/`](09-deployment/README.md) |
 
 ## Stack
 
@@ -55,7 +33,7 @@ curl -X POST http://127.0.0.1:8000/chat -H "Content-Type: application/json" -d "
   one never clobbers another's store
 - **LLM (generation)**: Qorebit, a local `flan-t5-base` model, Hugging Face's hosted
   Inference API, or Ollama (`llama3.2:3b`, local) for `06-agents/` and `07-langgraph/` — see
-  the tables above for which file uses which
+  each concept's README for which file uses which
 
 ## Project structure
 
@@ -144,7 +122,8 @@ ai-engineering/                             # project root
 ├── 08-evaluation/                          # RAG eval harness, see its README
 │   ├── README.md
 │   └── 01_rag_eval.py
-├── 09-deployment/                          # FastAPI agent service, see section above
+├── 09-deployment/                          # FastAPI agent service, see its README
+│   ├── README.md
 │   └── 01_fastapi_agent_service.py           # needs Ollama
 ├── rag-app/
 │   ├── README.md                           # concept write-up: setup, running it, gotchas
@@ -277,24 +256,19 @@ only placeholders and is safe to commit.
 ## Running it
 
 Make sure your virtual environment is activated (prompt shows `(venv)`) and you're in the
-project root. See [`rag-app/README.md`](rag-app/README.md) for the RAG pipeline's exact run
-commands and setup per version, and [`01-chunking-methods/README.md`](01-chunking-methods/README.md)
-for the chunking demos'.
+project root, then run any file with `python <folder>/<file>.py` (or `cd` into the folder
+first). See the [Concepts](#concepts) table above for each folder's own README — it has the
+exact commands, which files (if any) need `QOREBIT_API_KEY` or Ollama, and its own gotchas.
 
 Ollama is the one thing in this project that needs installing beyond `pip install` — see
 [`06-agents/README.md`](06-agents/README.md) for the setup steps.
 
-`09-deployment/01_fastapi_agent_service.py` is the one file that doesn't run once and exit —
-`python 09-deployment/01_fastapi_agent_service.py` starts a server that keeps running until you
-stop it (Ctrl+C), and you call it from another terminal instead (see its section above). It
-needs Ollama, same as [`07-langgraph/`](07-langgraph/README.md).
-
-Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
+Most scripts print their own clearly-labeled steps as they run, so you can see exactly what's
 happening — the chunks produced, what got stored, which passages matched your question, and
 finally the generated answer.
 
 The first run of any script downloads its models (a few hundred MB for embeddings, plus
-~930MB more for `flan-t5-base` if you run the fully-local Hugging Face version) and caches
+~930MB more for `flan-t5-base` if you run a fully-local Hugging Face version) and caches
 them locally in `~/.cache/huggingface` — later runs are fast, since nothing needs to be
 re-downloaded.
 
