@@ -58,14 +58,6 @@ them locally in `~/.cache/huggingface` — later runs are fast, since nothing ne
 re-downloaded. `rag_pipeline_huggingface_hosted.py` doesn't download a generation model at
 all, since that model runs on Hugging Face's servers, not yours.
 
-## Trying your own questions
-
-Open whichever file you're using and change the `QUESTION` constant near the top, then
-rerun it. You can also swap in your own document by replacing `data/sample.txt` (or
-changing `DOCUMENT_PATH`) and adjusting `CHUNK_SIZE` / `CHUNK_OVERLAP` if needed — repeat the
-change in every file you want to use the same document, since each one sets these constants
-independently.
-
 ## Notes / gotchas
 
 - **Custom headers for Qorebit.** In `rag_pipeline.py`, the `ChatOpenAI` client is

@@ -223,10 +223,10 @@ model's dependencies (PyTorch, etc.). Later installs are fast.
 
 Most of this project needs no API key at all: every demo folder
 (`01-chunking-methods/`, `02-prompt-engineering/`, `03-document-loaders/`, `04-memory/`,
-`05-chains/`) and `rag_pipeline_huggingface.py` run on free local models, and so do the
-non-`_qorebit.py` files in `06-agents/` and `07-langgraph/` (they use Ollama instead — see
-[`06-agents/README.md`](06-agents/README.md) for its setup steps). Skip this step entirely
-unless you plan to run
+`05-chains/`, `08-evaluation/`) and `rag_pipeline_huggingface.py` run on free local models,
+and so do the non-`_qorebit.py` files in `06-agents/`, `07-langgraph/`, and
+`09-deployment/` (they use Ollama instead — see [`06-agents/README.md`](06-agents/README.md)
+for its setup steps). Skip this step entirely unless you plan to run
 `rag_pipeline.py`, `rag_pipeline_pdf.py`, `rag_pipeline_huggingface_hosted.py`, or one of the
 `_qorebit.py` files in `06-agents/` or `07-langgraph/`.
 
