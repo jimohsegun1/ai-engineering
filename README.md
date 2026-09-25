@@ -3,8 +3,8 @@
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
 memory, chain composition, prompting techniques, agents, LangGraph, RAG evaluation,
-deployment, and semantic caching. Every file runs on its own; none of the demo folders
-depend on each other.
+deployment, semantic caching, and guardrails. Every file runs on its own; none of the demo
+folders depend on each other.
 
 ## Concepts
 
@@ -25,6 +25,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | RAG evaluation | [`08-evaluation/`](08-evaluation/README.md) |
 | Deployment | [`09-deployment/`](09-deployment/README.md) |
 | Semantic caching | [`10-caching/`](10-caching/README.md) |
+| Guardrails | [`11-guardrails/`](11-guardrails/README.md) |
 
 ## Stack
 
@@ -130,6 +131,9 @@ ai-engineering/                             # project root
 ├── 10-caching/                             # semantic caching demo, see its README
 │   ├── README.md
 │   └── 01_semantic_cache.py
+├── 11-guardrails/                          # output-validation retry demo, see its README
+│   ├── README.md
+│   └── 01_output_validation_retry.py         # needs Ollama
 ├── rag-app/
 │   ├── README.md                           # concept write-up: setup, running it, gotchas
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
@@ -230,10 +234,10 @@ model's dependencies (PyTorch, etc.). Later installs are fast.
 Most of this project needs no API key at all: every demo folder
 (`01-chunking-methods/`, `02-prompt-engineering/`, `03-document-loaders/`, `04-memory/`,
 `05-chains/`, `08-evaluation/`, `10-caching/`) and `rag_pipeline_huggingface.py` run on free
-local models,
-and so do the non-`_qorebit.py` files in `06-agents/`, `07-langgraph/`, and
-`09-deployment/` (they use Ollama instead — see [`06-agents/README.md`](06-agents/README.md)
-for its setup steps). Skip this step entirely unless you plan to run
+local models, and so do the non-`_qorebit.py` files in `06-agents/`, `07-langgraph/`,
+`09-deployment/`, and `11-guardrails/` (they use Ollama instead — see
+[`06-agents/README.md`](06-agents/README.md) for its setup steps). Skip this step entirely
+unless you plan to run
 `rag_pipeline.py`, `rag_pipeline_pdf.py`, `rag_pipeline_huggingface_hosted.py`, or one of the
 `_qorebit.py` files in `06-agents/` or `07-langgraph/`.
 
