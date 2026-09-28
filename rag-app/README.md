@@ -13,7 +13,7 @@ clearly commented:
 5. Similarity search
 6. RAG pipeline (retrieval + generation)
 
-There are **three versions of the pipeline** — same steps, same structure, different
+There are **three versions of the pipeline**; same steps, same structure, different
 generation backend:
 
 | File | Generation (step 6) | Setup needed |
