@@ -1,6 +1,6 @@
 # RAG Pipeline
 
-Part of the [AI Engineering From Scratch](../README.md) learning project — see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project, see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 A minimal Retrieval-Augmented Generation (RAG) pipeline, with each of the six RAG steps
