@@ -19,7 +19,7 @@ generation backend:
 | File | Generation (step 6) | Setup needed |
 | --- | --- | --- |
 | `rag_pipeline.py` | [Qorebit](https://qorebit.ai) : a hosted, OpenAI-compatible API | Qorebit API key in `.env` |
-| `rag_pipeline_huggingface.py` | `google/flan-t5-base`, run locally via `transformers` | None — no API key, no internet-dependent call |
+| `rag_pipeline_huggingface.py` | `google/flan-t5-base`, run locally via `transformers` | None, no API key, no internet-dependent call |
 | `rag_pipeline_huggingface_hosted.py` | A larger model (`HuggingFaceH4/zephyr-7b-beta`) via Hugging Face's hosted Inference API | Hugging Face access token in `.env` |
 
 All three use the same free local Hugging Face model for embeddings (step 3):
