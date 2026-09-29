@@ -54,7 +54,7 @@ finally the generated answer.
 
 The first run of any script downloads its models (a few hundred MB for embeddings, plus
 ~930MB more for `flan-t5-base` if you run the fully-local Hugging Face version) and caches
-them locally in `~/.cache/huggingface` — later runs are fast, since nothing needs to be
+them locally in `~/.cache/huggingface`; later runs are fast, since nothing needs to be
 re-downloaded. `rag_pipeline_huggingface_hosted.py` doesn't download a generation model at
 all, since that model runs on Hugging Face's servers, not yours.
 
