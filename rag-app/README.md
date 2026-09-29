@@ -32,7 +32,7 @@ document is `data/sample.pdf` (a small 3-page PDF about vector databases) instea
 `.txt` file, loaded with `PyPDFLoader` instead of `TextLoader`. The key difference to
 notice: `PyPDFLoader` returns **one Document per PDF page** (each carrying a `page` number
 in its metadata) rather than a single Document for the whole file, so step 1 already
-produces multiple documents before chunking even runs — every chunk downstream also keeps
+produces multiple documents before chunking even runs, every chunk downstream also keeps
 track of which page it came from. Like the other files, step 6 (the Qorebit call) is
 commented out by default.
 
