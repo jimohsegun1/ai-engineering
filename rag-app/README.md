@@ -42,7 +42,7 @@ Make sure your virtual environment is activated (prompt shows `(venv)`) and you'
 project root, then run whichever version you want:
 
 ```powershell
-python rag-app/rag_pipeline.py                          # Qorebit — needs QOREBIT_API_KEY in .env
+python rag-app/rag_pipeline.py                          # Qorebit; needs QOREBIT_API_KEY in .env
 python rag-app/rag_pipeline_huggingface.py              # fully local — no setup needed beyond step 4
 python rag-app/rag_pipeline_huggingface_hosted.py       # HF hosted API — needs HUGGINGFACEHUB_API_TOKEN in .env
 python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QOREBIT_API_KEY in .env
