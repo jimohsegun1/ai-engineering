@@ -49,7 +49,7 @@ python rag-app/rag_pipeline_pdf.py                      # PDF input — needs QO
 ```
 
 Each step prints its own clearly-labeled section as it runs, so you can see exactly what's
-happening — the chunks produced, what got stored, which passages matched your question, and
+happening, the chunks produced, what got stored, which passages matched your question, and
 finally the generated answer.
 
 The first run of any script downloads its models (a few hundred MB for embeddings, plus
