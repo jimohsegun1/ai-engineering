@@ -33,7 +33,7 @@ or `cd 10-caching` and run it by its bare name. Either way, the venv needs to be
 
 - **`flan-t5-base` answered "london" for the capital of France.** It's the same small
   (~250M parameter) model used throughout this project, chosen for being free and
-  CPU-friendly, not for accuracy — see the other concepts' READMEs for more examples of
+  CPU-friendly, not for accuracy; see the other concepts' READMEs for more examples of
   this. The interesting part for *this* demo: the cache faithfully serves whatever answer
   got stored on the first call, right or wrong. A semantic cache guarantees consistency
   (the same question always gets the same answer), not correctness, a wrong first answer
