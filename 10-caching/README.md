@@ -36,7 +36,7 @@ or `cd 10-caching` and run it by its bare name. Either way, the venv needs to be
   CPU-friendly, not for accuracy — see the other concepts' READMEs for more examples of
   this. The interesting part for *this* demo: the cache faithfully serves whatever answer
   got stored on the first call, right or wrong. A semantic cache guarantees consistency
-  (the same question always gets the same answer), not correctness — a wrong first answer
+  (the same question always gets the same answer), not correctness, a wrong first answer
   stays wrong for every paraphrase after it, until the cache is cleared.
 - **The similarity threshold is tuned for this project's embedding model and a handful of
   short factual questions.** A different embedding model, a different kind of question
