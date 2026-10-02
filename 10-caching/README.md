@@ -41,7 +41,7 @@ or `cd 10-caching` and run it by its bare name. Either way, the venv needs to be
 - **The similarity threshold is tuned for this project's embedding model and a handful of
   short factual questions.** A different embedding model, a different kind of question
   (longer, more technical), or a different vector space (Chroma defaults to squared L2,
-  not cosine) would need its own calibration — don't reuse `0.3` blindly elsewhere.
+  not cosine) would need its own calibration, don't reuse `0.3` blindly elsewhere.
 
 See the root [README](../README.md) for shared notes (telemetry warnings, vector store
 reset behavior, dependency version pins) that apply across the whole project.
