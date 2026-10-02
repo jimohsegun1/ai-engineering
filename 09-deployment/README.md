@@ -1,6 +1,6 @@
 # Deployment
 
-Part of the [AI Engineering From Scratch](../README.md) learning project — see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project, see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 Every earlier demo calls `graph.invoke(...)` or `chain.invoke(...)` once, in-process, then
