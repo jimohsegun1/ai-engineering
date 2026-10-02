@@ -81,7 +81,7 @@ all, since that model runs on Hugging Face's servers, not yours.
   availability and quota.** Unlike the other two files, this one calls a remote service
   (here, routed to the `featherless-ai` provider), so it can hit the same class of issue we
   saw with other hosted providers:
-  - Occasional `503 "temporarily at capacity"` errors for a given model — the script
+  - Occasional `503 "temporarily at capacity"` errors for a given model; the script
     retries automatically a few times before giving up.
   - Free accounts get a small monthly credit allowance for Inference Providers; once it's
     used up you'll get `402 Payment Required` until it resets next month, or until you add
