@@ -15,7 +15,7 @@ Runs on the same free local Hugging Face embeddings + `flan-t5-base` + Chroma st
 [`rag-app/rag_pipeline_huggingface.py`](../rag-app/README.md) — no API key needed. The
 threshold (`SIMILARITY_THRESHOLD = 0.3`) was calibrated empirically: true paraphrases of the
 same question scored 0.09-0.15 on Chroma's squared-L2 distance, while a related-but-different
-question scored 1.05 and an unrelated one scored 1.71 — 0.3 sits cleanly in the gap.
+question scored 1.05 and an unrelated one scored 1.71, 0.3 sits cleanly in the gap.
 
 A fixed run of 5 questions (exact repeats, paraphrases, and genuinely new questions) prints
 each as a HIT or MISS with its distance and wall-clock time, then a summary comparing average
