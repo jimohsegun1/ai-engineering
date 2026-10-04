@@ -10,7 +10,7 @@ exits. `01_fastapi_agent_service.py` takes the supervisor graph from
 other programs can call:
 
 - `GET /health`: a plain liveness check
-- `POST /chat` — `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
+- `POST /chat`: `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
 
 The graph (and its connection to Ollama) is built once at server startup rather than once per
 request. Needs the same Ollama setup as [`07-langgraph/`](../07-langgraph/README.md); no API
