@@ -19,7 +19,7 @@ key.
 ## Running it
 
 `01_fastapi_agent_service.py` is the one file in this project that doesn't run once and
-exit — it starts a server that keeps running until you stop it (Ctrl+C), and you call it
+exit, it starts a server that keeps running until you stop it (Ctrl+C), and you call it
 from another terminal instead:
 
 ```powershell
