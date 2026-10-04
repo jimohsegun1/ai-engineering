@@ -9,7 +9,7 @@ exits. `01_fastapi_agent_service.py` takes the supervisor graph from
 [FastAPI](https://fastapi.tiangolo.com/) app instead, so it runs as a long-lived HTTP service
 other programs can call:
 
-- `GET /health` — a plain liveness check
+- `GET /health`: a plain liveness check
 - `POST /chat` — `{"question": "..."}` in, `{"route": "...", "answer": "..."}` out
 
 The graph (and its connection to Ollama) is built once at server startup rather than once per
