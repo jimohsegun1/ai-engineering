@@ -10,7 +10,7 @@ checked automatically every run.
 
 It scores two layers separately: **retrieval** (did the vector store's top-`k` chunks contain
 the expected keywords, independent of the LLM?) and **answer** (did the final generated answer
-contain them too?). Splitting the two makes a failure diagnosable — a retrieval miss points at
+contain them too?). Splitting the two makes a failure diagnosable, a retrieval miss points at
 chunking/embedding/search, while a retrieval hit with an answer miss points at the prompt or
 the generation model instead. Runs entirely on the same free local Hugging Face embeddings +
 `flan-t5-base` + Chroma stack as [`rag-app/rag_pipeline_huggingface.py`](../rag-app/README.md)
