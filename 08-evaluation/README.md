@@ -1,6 +1,6 @@
 # RAG Evaluation
 
-Part of the [AI Engineering From Scratch](../README.md) learning project — see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project, see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 Every earlier RAG demo prints one answer to one question and you eyeball whether it looks
