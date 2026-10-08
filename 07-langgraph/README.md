@@ -1,6 +1,6 @@
 # LangGraph
 
-Part of the [AI Engineering From Scratch](../README.md) learning project — see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project; see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 [`06-agents/`](../06-agents/README.md) builds agents by hand with the older `AgentExecutor`.
