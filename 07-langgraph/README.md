@@ -14,7 +14,7 @@ a Qorebit-backed twin (`_qorebit.py` suffix) using `gpt-4o`, the same comparison
 | File | Concept | What it shows |
 | --- | --- | --- |
 | `01_simple_graph.py` | `StateGraph`, nodes, edges | The fundamental mechanic — two plain-function nodes run in sequence, no LLM at all, no Qorebit twin needed |
-| `02_conditional_graph.py` | `add_conditional_edges` | Routes to one of two nodes based on a rule — the graph-based equivalent of `05-chains/04_router_chain.py` — no LLM, no Qorebit twin needed |
+| `02_conditional_graph.py` | `add_conditional_edges` | Routes to one of two nodes based on a rule — the graph-based equivalent of `05-chains/04_router_chain.py`; no LLM, no Qorebit twin needed |
 | `03_tool_calling_agent.py` / `_qorebit.py` | `langgraph.prebuilt.create_react_agent` | The same tool-calling agent as `06-agents/03_tool_calling_agent.py`, built in one call instead of assembling a prompt + executor by hand |
 | `04_persistent_memory.py` / `_qorebit.py` | `MemorySaver` checkpointer + `thread_id` | The agent remembers earlier turns automatically — the modern replacement for wrapping `04-memory/`'s memory classes around an agent |
 | `05_multi_agent_graph.py` / `_qorebit.py` | multiple specialized nodes | A retriever-only "researcher" node feeds an LLM-backed "writer" node; a basic multi-node composition, one step short of a full multi-agent supervisor |
