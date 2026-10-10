@@ -19,7 +19,7 @@ a Qorebit-backed twin (`_qorebit.py` suffix) using `gpt-4o`, the same comparison
 | `04_persistent_memory.py` / `_qorebit.py` | `MemorySaver` checkpointer + `thread_id` | The agent remembers earlier turns automatically; the modern replacement for wrapping `04-memory/`'s memory classes around an agent |
 | `05_multi_agent_graph.py` / `_qorebit.py` | multiple specialized nodes | A retriever-only "researcher" node feeds an LLM-backed "writer" node; a basic multi-node composition, one step short of a full multi-agent supervisor |
 | `06_streaming.py` / `_qorebit.py` | `graph.stream()` | Two stream modes side by side: `"updates"` (one event per finished node) and `"messages"` (LLM tokens as they're generated, across every node) |
-| `07_supervisor_agent.py` / `_qorebit.py` | supervisor multi-agent pattern | An LLM-based supervisor node classifies each question and routes it to one of three specialist workers (math, writing, general) via `add_conditional_edges` — the general version of `02_conditional_graph.py`'s hand-written rule |
+| `07_supervisor_agent.py` / `_qorebit.py` | supervisor multi-agent pattern | An LLM-based supervisor node classifies each question and routes it to one of three specialist workers (math, writing, general) via `add_conditional_edges`; the general version of `02_conditional_graph.py`'s hand-written rule |
 
 Needs the same Ollama setup as [`06-agents/`](../06-agents/README.md) — no API key.
 
@@ -52,7 +52,7 @@ active and `data/`/`db/` are always resolved relative to the project root.
   partial run to fall back to, so they run live every time and need `QOREBIT_API_KEY` in
   `.env`. Only `03_tool_calling_agent_qorebit.py` needs `disable_streaming=True`, for the
   same `tool_call`-id-mangling reason documented in
-  [`06-agents/README.md`](../06-agents/README.md) — the other four Qorebit twins either bind
+  [`06-agents/README.md`](../06-agents/README.md); the other four Qorebit twins either bind
   no tools or (in `06_streaming_qorebit.py`'s case) specifically need streaming left on to
   demonstrate `stream_mode="messages"`.
 
