@@ -24,7 +24,7 @@ just the final working version.
 python 11-guardrails/01_output_validation_retry.py
 ```
 or `cd 11-guardrails` and run it by its bare name. Needs the same Ollama setup as
-[`06-agents/`](../06-agents/README.md) — no API key.
+[`06-agents/`](../06-agents/README.md); no API key.
 
 ## Notes / gotchas
 
