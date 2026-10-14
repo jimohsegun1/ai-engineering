@@ -10,7 +10,7 @@ fails, it feeds the parser's error back to the LLM and asks it to fix its own ou
 of surfacing a broken result to whatever code called it. `OutputFixingParser` wraps a normal
 `PydanticOutputParser` with exactly this retry loop.
 
-Uses Ollama (`llama3.2:3b`) rather than `flan-t5-base` — flan-t5-base barely attempted the
+Uses Ollama (`llama3.2:3b`) rather than `flan-t5-base`; flan-t5-base barely attempted the
 schema at all here (empty or one-word raw output), leaving the retry nothing recoverable to
 work with.
 
