@@ -31,7 +31,7 @@ or `cd 11-guardrails` and run it by its bare name. Needs the same Ollama setup a
 - **A retry guardrail is a safety net for near-miss formatting errors, not a fix for a model
   that has misunderstood the task.** Testing this turned up something worth keeping rather
   than prompting away. With only `parser.get_format_instructions()` (the bare JSON schema, no
-  filled example) in the prompt, `llama3.2:3b` consistently echoed the *schema itself* back —
+  filled example) in the prompt, `llama3.2:3b` consistently echoed the *schema itself* back;
   the literal field descriptions and types — instead of a filled instance, on every single
   review (naive: 0/5). `OutputFixingParser`'s automatic retry did not recover a single one of
   those failures (retry: still 0/5), because its repair prompt shows the model that same
