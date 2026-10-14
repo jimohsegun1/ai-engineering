@@ -1,6 +1,6 @@
 # Guardrails
 
-Part of the [AI Engineering From Scratch](../README.md) learning project — see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project, see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 [`02-prompt-engineering/05_structured_output_prompting.py`](../02-prompt-engineering/README.md)
