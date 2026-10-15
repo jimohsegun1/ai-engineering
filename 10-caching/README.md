@@ -4,7 +4,7 @@ Part of the [AI Engineering From Scratch](../README.md) learning project; see th
 README for one-time setup (virtual environment, dependencies, API keys).
 
 An exact-match cache (a plain dict keyed by the question string) only helps when someone
-asks the *identical* question twice. Real users rephrase — "What's the capital of France?"
+asks the *identical* question twice. Real users rephrase; "What's the capital of France?"
 vs "What's the capital city of France?" are the same question to a person, but different
 dict keys. `01_semantic_cache.py` fixes this: it embeds every question, and before calling
 the LLM it checks a Chroma-backed cache for a *similar enough* past question. If one is
