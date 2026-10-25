@@ -1,6 +1,6 @@
 # Chunking Methods
 
-Part of the [AI Engineering From Scratch](../README.md) learning project:  see the root
+Part of the [AI Engineering From Scratch](../README.md) learning project: see the root
 README for one-time setup (virtual environment, dependencies, API keys).
 
 `01-chunking-methods/` has six standalone files, each demonstrating a different chunking
