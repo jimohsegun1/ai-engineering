@@ -4,7 +4,7 @@ Part of the [AI Engineering From Scratch](../README.md) learning project: see th
 README for one-time setup (virtual environment, dependencies, API keys).
 
 `01-chunking-methods/` has six standalone files, each demonstrating a different chunking
-(step 2 of the RAG pipeline) strategy — everything else about the pipeline stays the same. In
+(step 2 of the RAG pipeline) strategy  everything else about the pipeline stays the same. In
 every file, step 6 (the Qorebit call) is **commented out on purpose**, so you can read/run
 steps 1-5 for free and uncomment step 6 yourself when you're ready to spend Qorebit credits:
 
