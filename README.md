@@ -147,7 +147,12 @@ ai-engineering/                             # project root
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
 │   ├── rag_pipeline_huggingface.py         # fully local version, steps 1-6
 │   ├── rag_pipeline_huggingface_hosted.py  # HF hosted Inference API version, steps 1-6
-│   └── rag_pipeline_pdf.py                 # PDF input version, steps 1-6
+│   ├── rag_pipeline_pdf.py                 # PDF input version, steps 1-6
+│   ├── rag_pipeline_streaming.py           # streaming output via chain.stream()
+│   ├── rag_pipeline_reranked.py            # cross-encoder reranking
+│   ├── rag_pipeline_hybrid.py              # hybrid search (BM25 + vector with EnsembleRetriever)
+│   ├── rag_pipeline_cli.py                 # configurable via argparse CLI flags
+│   └── rag_pipeline_persistent.py          # persistent vector store with --rebuild flag
 ├── requirements.txt                         # covers every file above
 ├── .env                                     # your real API keys (gitignored, never commit this)
 ├── .env.example                             # template showing which variables to set
@@ -155,6 +160,11 @@ ai-engineering/                             # project root
     ├── qorebit/                               # from rag_pipeline.py
     ├── huggingface_local/                     # from rag_pipeline_huggingface.py
     ├── huggingface_hosted/                    # from rag_pipeline_huggingface_hosted.py
+    ├── huggingface_streaming/                 # from rag_pipeline_streaming.py
+    ├── huggingface_reranked/                  # from rag_pipeline_reranked.py
+    ├── huggingface_hybrid/                    # from rag_pipeline_hybrid.py
+    ├── huggingface_cli/                       # from rag_pipeline_cli.py
+    ├── huggingface_persistent/                # from rag_pipeline_persistent.py
     ├── pdf/                                   # from rag_pipeline_pdf.py
     ├── chunking_<method>/                     # one per 01-chunking-methods/ file
     ├── loader_<method>/                       # one per 03-document-loaders/ file

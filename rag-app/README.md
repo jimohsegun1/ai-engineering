@@ -13,14 +13,26 @@ clearly commented:
 5. Similarity search
 6. RAG pipeline (retrieval + generation)
 
-There are **three versions of the pipeline**; same steps, same structure, different
-generation backend:
+There are **three core versions** of the pipeline (same steps, same structure, different
+generation backend) plus **four improvement variants** that extend the base pipeline:
+
+**Core versions:**
 
 | File | Generation (step 6) | Setup needed |
 | --- | --- | --- |
 | `rag_pipeline.py` | [Qorebit](https://qorebit.ai) : a hosted, OpenAI-compatible API | Qorebit API key in `.env` |
 | `rag_pipeline_huggingface.py` | `google/flan-t5-base`, run locally via `transformers` | None, no API key, no internet-dependent call |
 | `rag_pipeline_huggingface_hosted.py` | A larger model (`HuggingFaceH4/zephyr-7b-beta`) via Hugging Face's hosted Inference API | Hugging Face access token in `.env` |
+
+**Improvement variants (all run locally, no API key needed):**
+
+| File | What it adds |
+| --- | --- |
+| `rag_pipeline_streaming.py` | Step 6 uses `chain.stream()` — tokens print as they arrive instead of waiting for the full response |
+| `rag_pipeline_reranked.py` | Fetches more candidates than needed, then reranks with a cross-encoder (`cross-encoder/ms-marco-MiniLM-L-6-v2`) before passing context to the LLM |
+| `rag_pipeline_hybrid.py` | Combines dense vector search + BM25 keyword search via `EnsembleRetriever` (Reciprocal Rank Fusion) |
+| `rag_pipeline_cli.py` | All constants replaced with `--question`, `--doc`, `--chunk-size`, `--top-k` CLI flags — run `--help` to see all options |
+| `rag_pipeline_persistent.py` | Vector store is kept between runs; steps 1-4 are skipped on re-runs and only re-executed when `--rebuild` is passed |
 
 All three use the same free local Hugging Face model for embeddings (step 3):
 `sentence-transformers/all-MiniLM-L6-v2`.
