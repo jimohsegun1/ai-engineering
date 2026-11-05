@@ -27,6 +27,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Semantic caching | [`10-caching/`](10-caching/README.md) |
 | Guardrails | [`11-guardrails/`](11-guardrails/README.md) |
 | Structured extraction | [`12-structured-extraction/`](12-structured-extraction/README.md) |
+| Self-RAG & CRAG | [`17-self-rag/`](17-self-rag/README.md) |
 
 ## Stack
 
@@ -142,6 +143,11 @@ ai-engineering/                             # project root
 │   ├── 03_list_extraction.py                # list of entities in one pass
 │   ├── 04_validation.py                     # field_validator / model_validator
 │   └── 05_rag_extraction.py                 # retrieval -> extraction in one chain
+├── 17-self-rag/                             # three Self-RAG / CRAG demos, see its README
+│   ├── README.md
+│   ├── 01_self_rag_local.py                 # local HuggingFace flan-t5 state machine
+│   ├── 02_self_rag_ollama.py                # Ollama with Pydantic structured grading & hallucination check
+│   └── 03_self_rag_qorebit.py               # Qorebit (GPT-4o) twin
 ├── rag-app/
 │   ├── README.md                           # concept write-up: setup, running it, gotchas
 │   ├── rag_pipeline.py                     # Qorebit version, steps 1-6
@@ -179,7 +185,10 @@ ai-engineering/                             # project root
     ├── langgraph_multi_agent_qorebit/          # from 07-langgraph/05_multi_agent_graph_qorebit.py
     ├── eval_rag/                                # from 08-evaluation/01_rag_eval.py
     ├── semantic_cache/                          # from 10-caching/01_semantic_cache.py
-    └── extraction_rag/                          # from 12-structured-extraction/05_rag_extraction.py
+    ├── extraction_rag/                          # from 12-structured-extraction/05_rag_extraction.py
+    ├── self_rag_local/                          # from 17-self-rag/01_self_rag_local.py
+    ├── self_rag_ollama/                         # from 17-self-rag/02_self_rag_ollama.py
+    └── self_rag_qorebit/                        # from 17-self-rag/03_self_rag_qorebit.py
 ```
 
 ## Setup
