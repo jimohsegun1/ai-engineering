@@ -143,6 +143,12 @@ ai-engineering/                             # project root
 │   ├── 03_list_extraction.py                # list of entities in one pass
 │   ├── 04_validation.py                     # field_validator / model_validator
 │   └── 05_rag_extraction.py                 # retrieval -> extraction in one chain
+├── 14-tool-use-patterns/                    # four tool-use pattern demos, see its README
+│   ├── README.md
+│   ├── 01_parallel_tool_calls.py            # parallel tool calls with LangGraph ToolNode
+│   ├── 01_parallel_tool_calls_qorebit.py    # Qorebit (GPT-4o) twin
+│   ├── 02_tool_chaining.py                  # multi-tool chaining and state handoff
+│   └── 03_error_recovery.py                 # exception trapping, feedback loop, self-healing
 ├── 17-self-rag/                             # three Self-RAG / CRAG demos, see its README
 │   ├── README.md
 │   ├── 01_self_rag_local.py                 # local HuggingFace flan-t5 state machine
