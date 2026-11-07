@@ -1,4 +1,4 @@
-﻿# AI Engineering From Scratch
+# AI Engineering From Scratch
 
 A collection of small, standalone LangChain demos written as a learning project — a RAG
 pipeline plus focused demo folders for document loaders, chunking methods, conversation
@@ -27,6 +27,7 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Semantic caching | [`10-caching/`](10-caching/README.md) |
 | Guardrails | [`11-guardrails/`](11-guardrails/README.md) |
 | Structured extraction | [`12-structured-extraction/`](12-structured-extraction/README.md) |
+| Multimodal RAG | [`13-multimodal/`](13-multimodal/README.md) |
 | Self-RAG & CRAG | [`17-self-rag/`](17-self-rag/README.md) |
 
 ## Stack
@@ -53,6 +54,8 @@ ai-engineering/                             # project root
 │   ├── sample2.txt                       # a second doc, for the directory-loader demo
 │   ├── sample.md                         # same content as sample.txt, restructured with Markdown headers
 │   ├── sample_code.py                    # small Python module, for the code-aware splitter
+│   ├── sample_architecture.png           # architecture diagram for multimodal RAG demos
+│   ├── sample_revenue_chart.png          # quarterly bar chart for multimodal RAG demos
 │   ├── sample.pdf                        # small 3-page PDF, for rag_pipeline_pdf.py / the PDF loader demo
 │   ├── sample.csv                        # small table, for the CSV loader demo
 │   └── sample.json                       # small nested JSON file, for the JSON loader demo
@@ -143,6 +146,12 @@ ai-engineering/                             # project root
 │   ├── 03_list_extraction.py                # list of entities in one pass
 │   ├── 04_validation.py                     # field_validator / model_validator
 │   └── 05_rag_extraction.py                 # retrieval -> extraction in one chain
+├── 13-multimodal/                           # four multimodal RAG demos, see its README
+│   ├── README.md
+│   ├── 01_image_summarization_and_embedding.py # visual context extraction & vector indexing
+│   ├── 02_multimodal_rag_pipeline.py        # heterogeneous text + visual QA pipeline
+│   ├── 02_multimodal_rag_qorebit.py         # GPT-4o Vision hosted twin
+│   └── 03_multi_vector_retriever.py         # decoupling summary search from raw image docstore
 ├── 14-tool-use-patterns/                    # four tool-use pattern demos, see its README
 │   ├── README.md
 │   ├── 01_parallel_tool_calls.py            # parallel tool calls with LangGraph ToolNode
@@ -192,6 +201,10 @@ ai-engineering/                             # project root
     ├── eval_rag/                                # from 08-evaluation/01_rag_eval.py
     ├── semantic_cache/                          # from 10-caching/01_semantic_cache.py
     ├── extraction_rag/                          # from 12-structured-extraction/05_rag_extraction.py
+    ├── multimodal_summaries/                    # from 13-multimodal/01_image_summarization_and_embedding.py
+    ├── multimodal_rag/                          # from 13-multimodal/02_multimodal_rag_pipeline.py
+    ├── multimodal_multi_vector/                 # from 13-multimodal/03_multi_vector_retriever.py
+    ├── multimodal_rag_qorebit/                  # from 13-multimodal/02_multimodal_rag_qorebit.py
     ├── self_rag_local/                          # from 17-self-rag/01_self_rag_local.py
     ├── self_rag_ollama/                         # from 17-self-rag/02_self_rag_ollama.py
     └── self_rag_qorebit/                        # from 17-self-rag/03_self_rag_qorebit.py
