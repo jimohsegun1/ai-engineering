@@ -65,9 +65,12 @@ print_step(1, "Inspect LangSmith Tracing Configuration")
 has_key = bool(os.environ.get("LANGCHAIN_API_KEY", "").startswith("lsv2_"))
 project_name = os.environ.get("LANGCHAIN_PROJECT", "ai-engineering-observability")
 
-# Enable tracing in process environment
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = project_name
+# Enable tracing in process environment if API key is present
+if has_key:
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    os.environ["LANGCHAIN_PROJECT"] = project_name
+else:
+    os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 print(f"  LANGCHAIN_TRACING_V2: {os.environ.get('LANGCHAIN_TRACING_V2')}")
 print(f"  LANGCHAIN_PROJECT:    {project_name}")

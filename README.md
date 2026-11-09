@@ -28,6 +28,8 @@ of them: the stack, project layout, one-time setup, and cross-cutting notes.
 | Guardrails | [`11-guardrails/`](11-guardrails/README.md) |
 | Structured extraction | [`12-structured-extraction/`](12-structured-extraction/README.md) |
 | Multimodal RAG | [`13-multimodal/`](13-multimodal/README.md) |
+| Tool use patterns | [`14-tool-use-patterns/`](14-tool-use-patterns/README.md) |
+| Observability & tracing | [`15-observability/`](15-observability/README.md) |
 | Self-RAG & CRAG | [`17-self-rag/`](17-self-rag/README.md) |
 
 ## Stack
@@ -158,6 +160,12 @@ ai-engineering/                             # project root
 │   ├── 01_parallel_tool_calls_qorebit.py    # Qorebit (GPT-4o) twin
 │   ├── 02_tool_chaining.py                  # multi-tool chaining and state handoff
 │   └── 03_error_recovery.py                 # exception trapping, feedback loop, self-healing
+├── 15-observability/                        # four observability & tracing demos, see its README
+│   ├── README.md
+│   ├── 01_custom_callbacks_tracing.py       # zero-cloud BaseCallbackHandler profiling & flame-graph
+│   ├── 02_opentelemetry_tracing.py          # OpenTelemetry tracer with GenAI semantic spans
+│   ├── 03_langsmith_tracing.py              # LangSmith production tracing with metadata & tags
+│   └── 03_langsmith_tracing_qorebit.py      # Qorebit (GPT-4o) twin with LangSmith token accounting
 ├── 17-self-rag/                             # three Self-RAG / CRAG demos, see its README
 │   ├── README.md
 │   ├── 01_self_rag_local.py                 # local HuggingFace flan-t5 state machine
@@ -207,7 +215,11 @@ ai-engineering/                             # project root
     ├── multimodal_rag_qorebit/                  # from 13-multimodal/02_multimodal_rag_qorebit.py
     ├── self_rag_local/                          # from 17-self-rag/01_self_rag_local.py
     ├── self_rag_ollama/                         # from 17-self-rag/02_self_rag_ollama.py
-    └── self_rag_qorebit/                        # from 17-self-rag/03_self_rag_qorebit.py
+    ├── self_rag_qorebit/                        # from 17-self-rag/03_self_rag_qorebit.py
+    ├── observability_local/                     # from 15-observability/01_custom_callbacks_tracing.py
+    ├── observability_otel/                      # from 15-observability/02_opentelemetry_tracing.py
+    ├── observability_langsmith/                 # from 15-observability/03_langsmith_tracing.py
+    └── observability_qorebit/                   # from 15-observability/03_langsmith_tracing_qorebit.py
 ```
 
 ## Setup
@@ -302,7 +314,7 @@ cp .env.example .env
 
 Then open `.env` and fill in whichever key(s) you need:
 - `QOREBIT_API_KEY` — for `rag_pipeline.py`, `rag_pipeline_pdf.py`, the four
-  `06-agents/*_qorebit.py` files, and the five `07-langgraph/*_qorebit.py` files. From your
+  `06-agents/`, `07-langgraph/`, `13-multimodal/`, `14-tool-use-patterns/`, `15-observability/`, and `17-self-rag/`. From your
   Qorebit dashboard → API Keys, looks like `qb_live_...`.
 - `HUGGINGFACEHUB_API_TOKEN` — for `rag_pipeline_huggingface_hosted.py`. Get a free one at
   [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) → "Create new
