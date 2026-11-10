@@ -12,9 +12,10 @@ Evaluates:
   - Splitting execution latency (ms)
   - Chunk volume, average size, and size uniformity (standard deviation)
   - Chunk Boundary Coherence (preservation of natural sentence, paragraph, and function boundaries)
+  - Indexing & Embedding latency (ms) into isolated Chroma vector stores
   - Retrieval Precision (P@k) over a ground-truth question-keyword eval set
-  - Context Recall / Hit Rate across top-k retrieved chunks
-  - Retrieval query latency
+  - Context Recall (Keyword coverage across retrieved context chunks)
+  - Mean query retrieval latency (ms)
 
 Runs locally using free HuggingFace embeddings (sentence-transformers/all-MiniLM-L6-v2)
 and Chroma vector stores under db/benchmark_chunking_<method>/.
@@ -22,12 +23,11 @@ and Chroma vector stores under db/benchmark_chunking_<method>/.
 
 import math
 import os
-import re
 import shutil
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 # Disable Chroma telemetry before imports
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
@@ -52,6 +52,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PROSE_TEXT_PATH = PROJECT_ROOT / "data" / "sample.txt"
 MARKDOWN_PATH = PROJECT_ROOT / "data" / "sample.md"
 CODE_PATH = PROJECT_ROOT / "data" / "sample_code.py"
+DB_ROOT = PROJECT_ROOT / "db"
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 TOP_K = 3
@@ -69,7 +70,6 @@ def print_step(number: int, title: str) -> None:
 # ---------------------------------------------------------------------------
 # Evaluation Query Suite & Ground Truth Keywords
 # ---------------------------------------------------------------------------
-# Covers diverse retrieval scenarios across both conceptual prose and Python code.
 BENCHMARK_EVAL_SET = [
     {
         "id": "q1_ml_categories",
@@ -127,16 +127,17 @@ class RetrievalMetrics:
     avg_query_latency_ms: float = 0.0
     retrieval_precision: float = 0.0
     context_recall: float = 0.0
-    detailed_hits: dict[str, bool] = field(default_factory=dict)
+    detailed_hits: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 @dataclass
 class StrategyBenchmarkResult:
     name: str
+    slug: str
     strategy_type: str
+    best_use_case: str
     chunk_metrics: ChunkMetrics
-    retrieval_metrics: RetrievalMetrics | None = None
-    sample_first_chunk: str = ""
+    retrieval_metrics: RetrievalMetrics
 
 
 # ---------------------------------------------------------------------------
@@ -146,8 +147,7 @@ def compute_boundary_coherence(chunks: list[Document]) -> float:
     """Evaluate whether chunk boundaries preserve natural sentence/declaration units.
 
     Scores 1.0 if every chunk begins at a natural sentence/header/code declaration start
-    and terminates with appropriate sentence punctuation or block closure delimiters,
-    rather than severing sentences mid-clause or words mid-token.
+    and terminates with appropriate sentence punctuation or block closure delimiters.
     """
     if not chunks:
         return 0.0
@@ -185,13 +185,8 @@ def compute_boundary_coherence(chunks: list[Document]) -> float:
         if not text:
             continue
 
-        # Check clean start (capitalized word, comment, heading, or code declaration)
         starts_clean = text[0].isupper() or text.startswith(valid_starts) or text[0].isdigit()
-
-        # Check clean termination (sentence-ending punctuation or code delimiter)
         ends_clean = text.endswith(valid_ends)
-
-        # Check lack of mid-word trailing hyphenation or orphaned punctuation
         no_dangling_split = not (text.endswith("-") or text.endswith(","))
 
         if starts_clean and ends_clean and no_dangling_split:
@@ -220,6 +215,57 @@ def calculate_chunk_distribution(chunks: list[Document], latency_ms: float) -> C
         chunking_latency_ms=round(latency_ms, 2),
         boundary_coherence_score=coherence,
     )
+
+
+# ---------------------------------------------------------------------------
+# Retrieval Evaluator (Precision & Recall)
+# ---------------------------------------------------------------------------
+def evaluate_retrieval(
+    vector_store: Chroma,
+    eval_set: list[dict],
+    top_k: int = TOP_K,
+) -> tuple[float, float, float, dict[str, dict[str, float]]]:
+    """Compute mean Retrieval Precision (P@k), Context Recall, and query latency."""
+    precisions: list[float] = []
+    recalls: list[float] = []
+    query_times: list[float] = []
+    details: dict[str, dict[str, float]] = {}
+
+    for item in eval_set:
+        query = item["question"]
+        expected_keywords = item["expected_keywords"]
+
+        t_start = time.perf_counter()
+        docs = vector_store.similarity_search(query, k=top_k)
+        q_time_ms = (time.perf_counter() - t_start) * 1000.0
+        query_times.append(q_time_ms)
+
+        # 1. Precision@k: fraction of retrieved chunks containing >= 1 keyword
+        relevant_chunks = 0
+        for doc in docs:
+            content_lower = doc.page_content.lower()
+            if any(kw.lower() in content_lower for kw in expected_keywords):
+                relevant_chunks += 1
+        query_precision = relevant_chunks / max(len(docs), 1)
+
+        # 2. Context Recall: fraction of expected keywords present in combined top-k context
+        combined_text = " ".join(doc.page_content for doc in docs).lower()
+        matched_kws = sum(1 for kw in expected_keywords if kw.lower() in combined_text)
+        query_recall = matched_kws / max(len(expected_keywords), 1)
+
+        precisions.append(query_precision)
+        recalls.append(query_recall)
+        details[item["id"]] = {
+            "precision": round(query_precision, 2),
+            "recall": round(query_recall, 2),
+            "latency_ms": round(q_time_ms, 1),
+        }
+
+    mean_precision = round(sum(precisions) / len(precisions), 3)
+    mean_recall = round(sum(recalls) / len(recalls), 3)
+    avg_query_time = round(sum(query_times) / len(query_times), 2)
+
+    return mean_precision, mean_recall, avg_query_time, details
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +299,6 @@ class ChunkingBenchmarkSuite:
         """4. MarkdownHeaderTextSplitter: Heading structure aware with recursive fallback."""
         md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=[("#", "h1"), ("##", "h2")])
         md_chunks = md_splitter.split_text(self.markdown_text)
-        # Combine with code chunks split using standard recursive splitter
         code_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         code_chunks = code_splitter.create_documents([self.code_text])
         return md_chunks + code_chunks
@@ -278,25 +323,88 @@ class ChunkingBenchmarkSuite:
         prose_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         return code_splitter.create_documents([self.code_text]) + prose_splitter.create_documents([self.prose_text])
 
-    def run_all_strategies(self) -> dict[str, tuple[list[Document], ChunkMetrics]]:
-        """Execute all 6 chunking strategies and compute chunk metrics."""
+    def benchmark_strategy(
+        self,
+        name: str,
+        slug: str,
+        strat_type: str,
+        best_use_case: str,
+        split_fn: Callable[[], list[Document]],
+    ) -> StrategyBenchmarkResult:
+        """Run full lifecycle benchmark for a single chunking strategy."""
+        # 1. Chunking phase
+        t0 = time.perf_counter()
+        chunks = split_fn()
+        chunk_time_ms = (time.perf_counter() - t0) * 1000.0
+        chunk_metrics = calculate_chunk_distribution(chunks, chunk_time_ms)
+
+        # 2. Vector indexing phase
+        persist_dir = DB_ROOT / f"benchmark_{slug}"
+        shutil.rmtree(persist_dir, ignore_errors=True)
+
+        t_idx_start = time.perf_counter()
+        vector_store = Chroma.from_documents(
+            documents=chunks,
+            embedding=self.embeddings,
+            persist_directory=str(persist_dir),
+        )
+        indexing_time_ms = (time.perf_counter() - t_idx_start) * 1000.0
+
+        # 3. Retrieval evaluation phase
+        precision, recall, avg_q_time, details = evaluate_retrieval(vector_store, BENCHMARK_EVAL_SET, top_k=TOP_K)
+
+        retrieval_metrics = RetrievalMetrics(
+            indexing_latency_ms=round(indexing_time_ms, 2),
+            avg_query_latency_ms=round(avg_q_time, 2),
+            retrieval_precision=precision,
+            context_recall=recall,
+            detailed_hits=details,
+        )
+
+        return StrategyBenchmarkResult(
+            name=name,
+            slug=slug,
+            strategy_type=strat_type,
+            best_use_case=best_use_case,
+            chunk_metrics=chunk_metrics,
+            retrieval_metrics=retrieval_metrics,
+        )
+
+    def run_all(self) -> list[StrategyBenchmarkResult]:
+        """Run all 6 strategies through the end-to-end benchmark suite."""
         strategies = [
-            ("CharacterTextSplitter", "Fixed Separator", self.split_character),
-            ("RecursiveCharacterTextSplitter", "Hierarchical Prose", self.split_recursive),
-            ("TokenTextSplitter", "BPE Token Counting", self.split_token),
-            ("MarkdownHeaderTextSplitter", "Structural Headings", self.split_markdown),
-            ("SemanticChunker", "Semantic Distance", self.split_semantic),
-            ("CodeSplitter (Python)", "Language AST-Aware", self.split_code),
+            ("CharacterTextSplitter", "chunking_character", "Fixed Separator", "Structured double-newline text", self.split_character),
+            ("RecursiveCharacterTextSplitter", "chunking_recursive", "Hierarchical Prose", "General unstructured prose", self.split_recursive),
+            ("TokenTextSplitter", "chunking_token", "BPE Token Counting", "Hard LLM context limits", self.split_token),
+            ("MarkdownHeaderTextSplitter", "chunking_markdown", "Structural Headings", "Documentation & technical specs", self.split_markdown),
+            ("SemanticChunker", "chunking_semantic", "Semantic Distance", "Dense prose with thematic shifts", self.split_semantic),
+            ("CodeSplitter (Python)", "chunking_code", "Language AST-Aware", "Source code repositories", self.split_code),
         ]
 
-        results = {}
-        for name, strat_type, split_fn in strategies:
-            start_t = time.perf_counter()
-            chunks = split_fn()
-            duration_ms = (time.perf_counter() - start_t) * 1000.0
-            metrics = calculate_chunk_distribution(chunks, duration_ms)
-            results[name] = (chunks, metrics)
+        results = []
+        for name, slug, strat_type, best_use, fn in strategies:
+            print(f"  Benchmarking: {name}...")
+            res = self.benchmark_strategy(name, slug, strat_type, best_use, fn)
+            results.append(res)
         return results
+
+
+def generate_markdown_table(results: list[StrategyBenchmarkResult]) -> str:
+    """Generate a GitHub Flavored Markdown comparison table."""
+    md = [
+        "| Strategy | Paradigm | Chunks | Avg Size | Boundary Coherence | Retrieval Precision (P@3) | Context Recall | Index Time | Query Time | Best Use Case |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+    ]
+    for r in results:
+        cm = r.chunk_metrics
+        rm = r.retrieval_metrics
+        md.append(
+            f"| `{r.name}` | {r.strategy_type} | {cm.chunk_count} | {cm.avg_chars:.0f} chars | "
+            f"{cm.boundary_coherence_score * 100:.1f}% | {rm.retrieval_precision * 100:.1f}% | "
+            f"{rm.context_recall * 100:.1f}% | {rm.indexing_latency_ms:.0f} ms | "
+            f"{rm.avg_query_latency_ms:.1f} ms | {r.best_use_case} |"
+        )
+    return "\n".join(md)
 
 
 def main() -> None:
@@ -308,28 +416,50 @@ def main() -> None:
     print(f"  Prose text:    {PROSE_TEXT_PATH.name} ({len(prose)} chars)")
     print(f"  Markdown text: {MARKDOWN_PATH.name} ({len(markdown)} chars)")
     print(f"  Python code:   {CODE_PATH.name} ({len(code)} chars)")
+    print(f"  Test queries:  {len(BENCHMARK_EVAL_SET)} questions covering Prose and Python Code")
 
     print_step(2, "Initialize Shared Embedding Model")
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     print(f"  Embedding model initialized: {EMBEDDING_MODEL}")
 
-    print_step(3, "Execute 6 Chunking Strategies & Analyze Boundary Coherence")
+    print_step(3, "Run End-to-End Benchmark across all 6 Chunking Strategies")
     suite = ChunkingBenchmarkSuite(prose, markdown, code, embeddings)
-    chunk_results = suite.run_all_strategies()
+    results = suite.run_all()
 
-    print(f"\n{'Strategy':<33} | {'Chunks':>6} | {'Avg Size':>8} | {'Range':>11} | {'Std Dev':>7} | {'Coherence':>9} | {'Split Time':>10}")
-    print("-" * 100)
-    for name, (chunks, metrics) in chunk_results.items():
-        range_str = f"{metrics.min_chars}-{metrics.max_chars}"
+    # Step 4: Terminal Summary Tables
+    print_step(4, "Benchmark Results Summary")
+
+    print("\n--- CHUNKING & BOUNDARY QUALITY ---")
+    print(f"{'Strategy':<33} | {'Chunks':>6} | {'Avg Chars':>9} | {'Range':>11} | {'Coherence':>9} | {'Split Time':>10}")
+    print("-" * 90)
+    for r in results:
+        cm = r.chunk_metrics
+        range_str = f"{cm.min_chars}-{cm.max_chars}"
         print(
-            f"{name:<33} | "
-            f"{metrics.chunk_count:>6} | "
-            f"{metrics.avg_chars:>8.1f} | "
+            f"{r.name:<33} | "
+            f"{cm.chunk_count:>6} | "
+            f"{cm.avg_chars:>9.1f} | "
             f"{range_str:>11} | "
-            f"{metrics.std_chars:>7.1f} | "
-            f"{metrics.boundary_coherence_score * 100:>8.1f}% | "
-            f"{metrics.chunking_latency_ms:>8.1f} ms"
+            f"{cm.boundary_coherence_score * 100:>8.1f}% | "
+            f"{cm.chunking_latency_ms:>8.1f} ms"
         )
+
+    print("\n--- RETRIEVAL PERFORMANCE & ACCURACY (Top-k=3) ---")
+    print(f"{'Strategy':<33} | {'Precision (P@3)':>15} | {'Context Recall':>14} | {'Index Latency':>13} | {'Query Latency':>13}")
+    print("-" * 96)
+    for r in results:
+        rm = r.retrieval_metrics
+        print(
+            f"{r.name:<33} | "
+            f"{rm.retrieval_precision * 100:>14.1f}% | "
+            f"{rm.context_recall * 100:>13.1f}% | "
+            f"{rm.indexing_latency_ms:>11.1f} ms | "
+            f"{rm.avg_query_latency_ms:>11.1f} ms"
+        )
+
+    print("\n--- MARKDOWN COMPARISON TABLE ---")
+    md_table = generate_markdown_table(results)
+    print(md_table)
 
 
 if __name__ == "__main__":
