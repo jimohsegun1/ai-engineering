@@ -129,9 +129,11 @@ ai-engineering/                             # project root
 │   ├── 06_streaming_qorebit.py
 │   ├── 07_supervisor_agent.py
 │   └── 07_supervisor_agent_qorebit.py
-├── 08-evaluation/                          # RAG eval harness, see its README
+├── 08-evaluation/                          # RAG eval & chunking benchmark demos, see its README
 │   ├── README.md
-│   └── 01_rag_eval.py
+│   ├── 01_rag_eval.py                      # retrieval vs answer quality scoring
+│   ├── 02_benchmark_chunking.py            # benchmark scoring all 6 chunking strategies
+│   └── benchmark_report.md                 # generated markdown benchmark summary
 ├── 09-deployment/                          # FastAPI agent service, see its README
 │   ├── README.md
 │   └── 01_fastapi_agent_service.py           # needs Ollama
@@ -207,6 +209,7 @@ ai-engineering/                             # project root
     ├── langgraph_multi_agent/                  # from 07-langgraph/05_multi_agent_graph.py
     ├── langgraph_multi_agent_qorebit/          # from 07-langgraph/05_multi_agent_graph_qorebit.py
     ├── eval_rag/                                # from 08-evaluation/01_rag_eval.py
+    ├── benchmark_chunking_<method>/             # one per 08-evaluation/02_benchmark_chunking.py strategy
     ├── semantic_cache/                          # from 10-caching/01_semantic_cache.py
     ├── extraction_rag/                          # from 12-structured-extraction/05_rag_extraction.py
     ├── multimodal_summaries/                    # from 13-multimodal/01_image_summarization_and_embedding.py
