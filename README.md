@@ -333,7 +333,7 @@ project root, then run any file with `python <folder>/<file>.py` (or `cd` into t
 first). See the [Concepts](#concepts) table above for each folder's own README — it has the
 exact commands, which files (if any) need `QOREBIT_API_KEY` or Ollama, and its own gotchas.
 
-Ollama is the one thing in this project that needs installing beyond `pip install`: see
+Ollama is the one thing in this project that needs installing beyond `pip install` — see
 [`06-agents/README.md`](06-agents/README.md) for the setup steps.
 
 Most scripts print their own clearly-labeled steps as they run, so you can see exactly what's
