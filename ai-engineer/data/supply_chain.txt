@@ -1,0 +1,30 @@
+Global Automotive Semiconductor & Supply Chain Network
+
+1. Semiconductor Foundries (Raw Silicon Production)
+SiliconCore Fab is an advanced semiconductor fabrication facility located in Dresden, Germany. SiliconCore Fab manufactures two critical silicon components: the SC-9901 high-efficiency powertrain microcontroller and the PC-404 thermal power controller.
+TSMC Fab 18 is a large-scale manufacturing plant located in Tainan, Taiwan. TSMC Fab 18 specializes in high-bandwidth sensor silicon, manufacturing the SP-12 optical radar processor and the NPU-Titan neural processing unit.
+
+2. Tier-1 Automotive Component Suppliers
+Bosch Mobility, headquartered in Stuttgart, Germany, is a Tier-1 system integrator. Bosch Mobility purchases the SC-9901 microcontroller and PC-404 thermal power controller from SiliconCore Fab. Bosch uses these chips to assemble the MotorControl-X integrated inverter and electric drive system.
+Continental Automotive, located in Hanover, Germany, is a Tier-1 safety systems supplier. Continental purchases the SP-12 optical radar processor from TSMC Fab 18. Continental incorporates the SP-12 into the VisionDrive autonomous emergency braking and perception module.
+Apex Power Systems, located in Austin, Texas, is an energy storage and power electronics supplier. Apex Power Systems sources the PC-404 thermal power controller directly from SiliconCore Fab to assemble the BMU-300 high-voltage battery management unit.
+
+3. Automotive Manufacturers (OEMs) and Vehicle Assembly
+Apex Motors is an electric vehicle manufacturer operating assembly plants in Austin, Texas and Berlin, Germany. Apex Motors manufactures two flagship vehicles: the Apex CyberTruck electric utility pickup and the Apex CyberSedan luxury sedan. Both vehicles require the MotorControl-X drive unit from Bosch Mobility and the BMU-300 battery management unit from Apex Power Systems.
+EuroDrive Group is a European automotive group headquartered in Munich, Germany. EuroDrive manufactures the EuroCross electric SUV. The EuroCross SUV requires the MotorControl-X drive system from Bosch Mobility and the VisionDrive perception sensor module from Continental Automotive.
+
+4. Global Logistics Routes and Distribution Hubs
+Rhine Logistics Hub in Germany handles inland freight routes connecting the Dresden SiliconCore Fab to the Bosch Mobility assembly plant in Stuttgart.
+Rotterdam Container Port in the Netherlands processes transatlantic shipping lines, dispatching maritime container cargo containing PC-404 controllers from Europe to Apex Power Systems in Austin, Texas.
+
+5. Commercial Fleet Customers and Purchase Orders
+SwiftLogistics Corporation is a freight carrier headquartered in Chicago, Illinois. SwiftLogistics has placed purchase order ORD-881 for 500 units of the Apex CyberTruck to electrify its regional distribution fleet.
+Nordic Fleet Rental is a Scandinavian vehicle leasing conglomerate based in Oslo, Norway. Nordic Fleet Rental has placed purchase order ORD-442 for 300 units of the EuroCross SUV for commercial rental fleets across Northern Europe.
+MetroCity Transit is a municipal transport agency in Germany that placed purchase order ORD-105 for 150 units of the Apex CyberSedan for official government service.
+
+6. Failure Cascades and Dependency Mapping
+Because automotive assembly requires 100% parts completeness, a supply stoppage at any single node cascades down the entire graph:
+- A disruption at SiliconCore Fab in Dresden halts production of SC-9901 and PC-404.
+- Without SC-9901 and PC-404, Bosch Mobility cannot assemble MotorControl-X, and Apex Power Systems cannot assemble BMU-300.
+- Without MotorControl-X and BMU-300, Apex Motors must pause assembly of CyberTruck and CyberSedan. EuroDrive must pause assembly of EuroCross SUV.
+- Consequently, purchase orders ORD-881 (SwiftLogistics), ORD-442 (Nordic Fleet Rental), and ORD-105 (MetroCity Transit) face immediate fulfillment delays.

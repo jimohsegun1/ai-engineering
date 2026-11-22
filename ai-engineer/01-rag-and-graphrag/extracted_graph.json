@@ -1,0 +1,193 @@
+{
+  "entities": [
+    {
+      "name": "SiliconCore Fab",
+      "category": "Foundry",
+      "location_or_attribute": "Dresden, Germany"
+    },
+    {
+      "name": "TSMC Fab 18",
+      "category": "Foundry",
+      "location_or_attribute": "Tainan, Taiwan"
+    },
+    {
+      "name": "SC-9901",
+      "category": "Microchip",
+      "location_or_attribute": "Silicon Component"
+    },
+    {
+      "name": "PC-404",
+      "category": "Microchip",
+      "location_or_attribute": "Silicon Component"
+    },
+    {
+      "name": "Bosch Mobility",
+      "category": "Tier1_Supplier",
+      "location_or_attribute": "Stuttgart, Germany"
+    },
+    {
+      "name": "Continental Automotive",
+      "category": "Tier1_Supplier",
+      "location_or_attribute": "Hanover, Germany"
+    },
+    {
+      "name": "Apex Power Systems",
+      "category": "Tier1_Supplier",
+      "location_or_attribute": "Austin, Texas"
+    },
+    {
+      "name": "Apex CyberTruck",
+      "category": "Vehicle",
+      "location_or_attribute": "OEM: Apex Motors"
+    },
+    {
+      "name": "EuroCross",
+      "category": "Vehicle",
+      "location_or_attribute": "OEM: EuroDrive"
+    },
+    {
+      "name": "MotorControl-X",
+      "category": "Subsystem",
+      "location_or_attribute": "Inverter & Drive"
+    },
+    {
+      "name": "BMU-300",
+      "category": "Subsystem",
+      "location_or_attribute": "Battery Management"
+    },
+    {
+      "name": "VisionDrive",
+      "category": "Subsystem",
+      "location_or_attribute": "Perception Sensor"
+    },
+    {
+      "name": "Apex CyberSedan",
+      "category": "Vehicle",
+      "location_or_attribute": "OEM: Apex Motors"
+    },
+    {
+      "name": "EuroCross SUV",
+      "category": "Vehicle",
+      "location_or_attribute": "OEM: EuroDrive"
+    },
+    {
+      "name": "SwiftLogistics Corporation",
+      "category": "Customer",
+      "location_or_attribute": "PO: ORD-881 (500 units)"
+    },
+    {
+      "name": "Nordic Fleet Rental",
+      "category": "Customer",
+      "location_or_attribute": "PO: ORD-442 (300 units)"
+    },
+    {
+      "name": "MetroCity Transit",
+      "category": "Customer",
+      "location_or_attribute": "PO: ORD-105 (150 units)"
+    }
+  ],
+  "relationships": [
+    {
+      "source": "SiliconCore Fab",
+      "target": "SC-9901",
+      "relation_type": "MANUFACTURES",
+      "description": "Primary silicon manufacturing"
+    },
+    {
+      "source": "SiliconCore Fab",
+      "target": "PC-404",
+      "relation_type": "MANUFACTURES",
+      "description": "Primary silicon manufacturing"
+    },
+    {
+      "source": "SC-9901",
+      "target": "Bosch Mobility",
+      "relation_type": "SUPPLIED_TO",
+      "description": "B2B component supply"
+    },
+    {
+      "source": "PC-404",
+      "target": "Apex Power Systems",
+      "relation_type": "SUPPLIED_TO",
+      "description": "B2B component supply"
+    },
+    {
+      "source": "SP-12",
+      "target": "Continental Automotive",
+      "relation_type": "SUPPLIED_TO",
+      "description": "B2B component supply"
+    },
+    {
+      "source": "Bosch Mobility",
+      "target": "MotorControl-X",
+      "relation_type": "ASSEMBLES",
+      "description": "Assembles drive unit"
+    },
+    {
+      "source": "Apex Power Systems",
+      "target": "BMU-300",
+      "relation_type": "ASSEMBLES",
+      "description": "Assembles battery management"
+    },
+    {
+      "source": "Continental Automotive",
+      "target": "VisionDrive",
+      "relation_type": "ASSEMBLES",
+      "description": "Assembles vision module"
+    },
+    {
+      "source": "MotorControl-X",
+      "target": "Apex CyberTruck",
+      "relation_type": "INSTALLED_IN",
+      "description": "Powertrain drive unit"
+    },
+    {
+      "source": "BMU-300",
+      "target": "Apex CyberTruck",
+      "relation_type": "INSTALLED_IN",
+      "description": "Battery management system"
+    },
+    {
+      "source": "MotorControl-X",
+      "target": "Apex CyberSedan",
+      "relation_type": "INSTALLED_IN",
+      "description": "Powertrain drive unit"
+    },
+    {
+      "source": "BMU-300",
+      "target": "Apex CyberSedan",
+      "relation_type": "INSTALLED_IN",
+      "description": "Battery management system"
+    },
+    {
+      "source": "MotorControl-X",
+      "target": "EuroCross SUV",
+      "relation_type": "INSTALLED_IN",
+      "description": "Powertrain drive unit"
+    },
+    {
+      "source": "VisionDrive",
+      "target": "EuroCross SUV",
+      "relation_type": "INSTALLED_IN",
+      "description": "Perception module"
+    },
+    {
+      "source": "Apex CyberTruck",
+      "target": "SwiftLogistics Corporation",
+      "relation_type": "DELIVERED_TO",
+      "description": "Fulfills purchase order ORD-881"
+    },
+    {
+      "source": "EuroCross SUV",
+      "target": "Nordic Fleet Rental",
+      "relation_type": "DELIVERED_TO",
+      "description": "Fulfills purchase order ORD-442"
+    },
+    {
+      "source": "Apex CyberSedan",
+      "target": "MetroCity Transit",
+      "relation_type": "DELIVERED_TO",
+      "description": "Fulfills purchase order ORD-105"
+    }
+  ]
+}
