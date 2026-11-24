@@ -14,8 +14,8 @@ This repository pack provides practical, production-grade implementations of adv
 | --- | --- | --- | --- |
 | [`01-rag-and-graphrag/`](01-rag-and-graphrag/README.md) | Graph-Augmented Retrieval | NetworkX, HuggingFace MiniLM, Chroma, Hybrid RAG | ✅ Implemented (Phase 1) |
 | [`02-neo4j-knowledge-graphs/`](02-neo4j-knowledge-graphs/README.md) | Neo4j Knowledge Graphs & Cypher | Neo4j, Cypher, Text-to-Cypher Agent, Schema Audits | ✅ Implemented (Phase 1) |
-| `03-mcp-servers-and-clients/` | Model Context Protocol (MCP) | Python MCP SDK, stdio/SSE, LangChain Agent Binding | 📋 Planned (Phase 2) |
-| `04-langgraph-workflows/` | Stateful Agent Workflows | LangGraph, StateGraph, Cyclic Routing, SqliteSaver | 📋 Planned (Phase 2) |
+| [`03-mcp-servers-and-clients/`](03-mcp-servers-and-clients/README.md) | Model Context Protocol (MCP) | Python MCP SDK, stdio/SSE, LangChain Agent Binding | ✅ Implemented (Phase 2) |
+| [`04-langgraph-workflows/`](04-langgraph-workflows/README.md) | Stateful Agent Workflows | LangGraph, StateGraph, Cyclic Routing, SqliteSaver | ✅ Implemented (Phase 2) |
 | `05-agent-patterns/` | Cognitive Decision Patterns | ReAct, Semantic Routing, Reflection, Human-in-the-Loop | 📋 Planned (Phase 3) |
 | `06-deep-agents-and-guardrails/` | Deep Agents & Production Safety | Supervisor Multi-Agent, Researcher, Pydantic Guards | 📋 Planned (Phase 3) |
 | `07-observability-langfuse/` | LLMOps & Distributed Tracing | Langfuse, Nested Traces, Token Accounting, Evals | 📋 Planned (Phase 4) |

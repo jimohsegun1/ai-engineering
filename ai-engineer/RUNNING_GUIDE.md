@@ -342,7 +342,249 @@ SUCCESS: Text-to-Cypher agent with safety guards and synthesis verified.
 
 ---
 
-## 4. Optional: Spin Up Local Neo4j Container
+## 4. Module 03: Model Context Protocol (MCP) Servers and Clients
+
+Located in: [`ai-engineer/03-mcp-servers-and-clients/`](03-mcp-servers-and-clients/README.md)
+
+### Script 1: Custom MCP Server (`01_mcp_server_custom_tools.py`)
+Implements an MCP server publishing specialized domain tools (`get_inventory_status`, `check_shipping_route`, `calculate_tariff_cost`), warehouse resource endpoints (`catalog://warehouses`), and triage prompts.
+
+```powershell
+python ai-engineer/03-mcp-servers-and-clients/01_mcp_server_custom_tools.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  MODEL CONTEXT PROTOCOL (MCP) - CUSTOM SERVER DEMONSTRATION
+  Framework: supply-chain-mcp-server via MCPServer (v2.x)
+======================================================================
+
+[Step 1] Inspecting Registered MCP Tools...
+  1. get_inventory_status: Query current inventory stock level, warehouse location, reorder thresholds, and unit costs for a given part ID.
+  2. check_shipping_route: Evaluate transit duration, carrier availability, carbon footprint, and customs risk score between origin and destination ports.
+  3. calculate_tariff_cost: Calculate import tariffs, customs processing duties, and total landed cost based on declared value, product category, and destination country.
+
+[Step 2] Inspecting Registered MCP Resources...
+  1. catalog://warehouses: Global Warehouses Status and Capacity (application/json)
+
+[Step 3] Inspecting Registered MCP Prompts...
+  1. supply_chain_triage: Standard incident response prompt for diagnosing supply chain bottlenecks and recommending rerouting.
+
+[Step 4] Executing Direct Tool Invocation Tests:
+  -> Invoking get_inventory_status(part_id='GPU-H100')...
+     Output: { "status": "success", "stock_level": 420, "status": "critical_low", ... }
+  -> Invoking check_shipping_route(origin_port='SHANGHAI', destination_port='LONG_BEACH')...
+     Output: { "mode": "Ocean Freight (Express)", "transit_days": 14, ... }
+  -> Invoking calculate_tariff_cost(part_id='GPU-H100', declared_value=50000.0, destination_country='USA')...
+     Output: { "total_tariffs_and_fees_usd": 13923.2, "total_landed_cost_usd": 63923.2, ... }
+
+======================================================================
+  [SUCCESS] All MCP tools, resources, and prompts validated successfully!
+======================================================================
+```
+
+To run as an active stdio server daemon for external clients:
+```powershell
+python ai-engineer/03-mcp-servers-and-clients/01_mcp_server_custom_tools.py --serve
+```
+
+---
+
+### Script 2: MCP Client Integration & Discovery (`02_mcp_client_integration.py`)
+Launches the MCP server subprocess via `stdio`, executes the JSON-RPC initialization handshake, queries available tools and resources, and dispatches remote tool calls.
+
+```powershell
+python ai-engineer/03-mcp-servers-and-clients/02_mcp_client_integration.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  MODEL CONTEXT PROTOCOL (MCP) - CLIENT INTEGRATION & DISCOVERY
+======================================================================
+
+[Phase 1] Launching Server Subprocess via Stdio Transport...
+[Phase 2] Performing JSON-RPC Handshake (initialize)...
+  Connected to: supply-chain-mcp-server (v1.0.0)
+[Phase 3] Tool Discovery (tools/list)...
+  Discovered 3 available tool(s):
+  • Tool: get_inventory_status
+  • Tool: check_shipping_route
+  • Tool: calculate_tariff_cost
+[Phase 4] Resource Discovery (resources/list & resources/read)...
+  Retrieved 4 global warehouse hubs from catalog://warehouses
+[Phase 5] Prompt Template Discovery (prompts/list)...
+  Retrieved 'supply_chain_triage'
+[Phase 6] Dispatching Tool Calls (tools/call)...
+  [Call 1] get_inventory_status(part_id='BAT-LFP-85') -> Stock: 1,850 units | OPTIMAL
+  [Call 2] check_shipping_route(SHANGHAI -> LONG_BEACH) -> Ocean Freight | 14 days
+  [Call 3] calculate_tariff_cost(BAT-LFP-85, $74,000) -> Landed Cost: $83,506.34
+
+======================================================================
+  [SUCCESS] MCP Client stdio integration session completed cleanly!
+======================================================================
+```
+
+---
+
+### Script 3: LangChain / LangGraph Agent Integration (`03_mcp_langchain_agent.py`)
+Dynamically adapts MCP tools into LangChain `StructuredTool` objects and runs an autonomous ReAct reasoning agent that triages a supply chain shortage.
+
+```powershell
+python ai-engineer/03-mcp-servers-and-clients/03_mcp_langchain_agent.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  LANGCHAIN / LANGGRAPH AGENT INTEGRATION WITH MCP TOOLS
+======================================================================
+
+[Step 1] Querying MCP Server Tool Registry...
+  Found 3 tool(s) registered on MCP server.
+[Step 2] Adapting MCP Tools into LangChain StructuredTool Objects...
+  • Adapted: get_inventory_status
+  • Adapted: check_shipping_route
+  • Adapted: calculate_tariff_cost
+
+[Thought 1] Query requests inventory health for part 'GPU-H100'.
+[Action 1] Invoking MCP tool: get_inventory_status(part_id='GPU-H100')
+[Observation 1] Current Stock: 420 units. Status: critical_low.
+
+[Thought 2] Assessing alternative freight corridors between FRANKFURT and LONG_BEACH.
+[Action 2] Invoking MCP tool: check_shipping_route(origin_port='FRANKFURT', destination_port='LONG_BEACH')
+[Observation 2] Route transit: 3 days via Air Cargo Freight.
+
+[Thought 3] Calculating customs tariffs for declared value $96,000.00 to USA.
+[Action 3] Invoking MCP tool: calculate_tariff_cost(part_id='GPU-H100', declared_value=96000.0, destination_country='USA')
+[Observation 3] Landed Cost: $122,732.54 (Tariffs: $26,732.54).
+
+======================================================================
+  EXECUTIVE SUPPLY CHAIN TRIAGE & DISRUPTION MITIGATION REPORT
+======================================================================
+1. Inventory Health: GPU-H100 | 420 units | CRITICAL_LOW
+2. Route & Transit: FRANKFURT -> LONG_BEACH | 3 days via Air Cargo
+3. Landed Duty: Declared $96,000 | Tariffs $26,732.54 | Total Landed: $122,732.54
+4. Recommendation: Immediate dispatch via Lufthansa Cargo recommended.
+======================================================================
+```
+
+---
+
+## 5. Module 04: LangGraph Workflows and Multi-Agent Orchestration
+
+Located in: [`ai-engineer/04-langgraph-workflows/`](04-langgraph-workflows/README.md)
+
+### Script 1: Stateful Graph Foundations (`01_stateful_graph_basics.py`)
+Demonstrates core LangGraph concepts: `StateGraph`, `TypedDict` schemas, append reducers (`Annotated[List[str], operator.add]`), and deterministic multi-node execution.
+
+```powershell
+python ai-engineer/04-langgraph-workflows/01_stateful_graph_basics.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  LANGGRAPH FOUNDATIONS: STATEFUL GRAPH & STATE REDUCERS
+======================================================================
+[Node: validate_order] Processing Order: ORD-2026-9941
+  -> Order validated successfully. 2 SKU(s) verified. Total Value: $128,242.50.
+[Node: allocate_warehouse] Determining optimal fulfillment hub...
+  -> Allocated fulfillment to hub: LONG-BEACH-DC.
+[Node: select_freight_and_sla] Selecting freight carrier SLA...
+  -> Carrier assigned: FedEx International Priority Air (2 days).
+[Node: generate_manifest] Assembling dispatch manifest...
+  -> Manifest generated: MNF-ORD-2026-9941-EXP.
+
+Accumulated Execution Log (State Reducer: operator.add):
+  1. Order received into queue.
+  2. [ORD-2026-9941] Order validated successfully. Total Value: $128,242.50.
+  3. [ORD-2026-9941] Allocated fulfillment to hub: LONG-BEACH-DC.
+  4. [ORD-2026-9941] Carrier assigned: FedEx International Priority Air (SLA: 2 days).
+  5. [ORD-2026-9941] Manifest generated: MNF-ORD-2026-9941-EXP.
+======================================================================
+```
+
+---
+
+### Script 2: Conditional Routing and Reflection Cycles (`02_conditional_routing_and_cycles.py`)
+Demonstrates dynamic branching (`add_conditional_edges`), quality gates, critic evaluation, and self-correcting plan refinement cycles.
+
+```powershell
+python ai-engineer/04-langgraph-workflows/02_conditional_routing_and_cycles.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  LANGGRAPH ADVANCED: CONDITIONAL ROUTING & REFLECTION CYCLES
+======================================================================
+[Node: analyze_disruption] Incident: INC-ROTTERDAM-STRIKE-88 (Part: GPU-H100)
+[Node: propose_mitigation] Generating Plan (Iteration 1/3)...
+  -> Strategy: Direct Emergency Air Charter | Transit: 2 days | Premium: $72,000
+[Node: evaluate_risk_and_cost] Evaluating Plan v1...
+  -> Risk Score: 65.0/100 (Threshold <= 20.0) -> REJECT: Unbudgeted air charter cost.
+
+>>> [Routing Decision] Risk Score 65.0 > 20.0 -> CYCLING BACK to 'propose_mitigation'
+
+[Node: propose_mitigation] Generating Plan (Iteration 2/3)...
+  -> Strategy: Scheduled Commercial Air Cargo + Bonded Transit | Transit: 4 days | Premium: $28,000
+[Node: evaluate_risk_and_cost] Evaluating Plan v2...
+  -> Risk Score: 15.0/100 (Threshold <= 20.0) -> APPROVED: Within budget ceiling.
+
+>>> [Routing Decision] Risk Score <= 20.0 -> Routing to 'approve_and_dispatch'
+
+[Node: approve_and_dispatch] Locking in approved mitigation plan...
+======================================================================
+  WORKFLOW TERMINATION SUMMARY: APPROVED_FOR_DISPATCH in 2 cycle(s)
+======================================================================
+```
+
+---
+
+### Script 3: Checkpointing, Persistence & Time Travel (`03_checkpointing_and_persistence.py`)
+Demonstrates durable state persistence with `SqliteSaver` (`data/checkpoints/orders.db`), multi-thread isolation, human-in-the-loop pauses (`interrupt_before`), manager approval updates, and historical state time travel.
+
+```powershell
+python ai-engineer/04-langgraph-workflows/03_checkpointing_and_persistence.py
+```
+
+**Expected Terminal Output:**
+```text
+======================================================================
+  LANGGRAPH CHECKPOINTING, PERSISTENCE & TIME TRAVEL
+  Checkpointer Database: data\checkpoints\orders.db
+======================================================================
+[Phase 1] Launching Two Independent Order Threads (alpha & beta)...
+  Order Alpha ($64,000) pauses before execute_fulfillment (High-Value Gate)
+  Order Beta ($485) pauses before execute_fulfillment
+
+[Phase 2] Inspecting Paused State via get_state()...
+  Thread Alpha Next Node: ('execute_fulfillment',) | Needs Approval: True
+
+[Phase 3] Human Intervention: Manager Reviews & Signs Off Order Alpha...
+  update_state() called with manager sign-off.
+  Resuming execution from checkpoint via invoke(None, config)...
+  Order Alpha Dispatched: True (Tracking: TRK-ORD-ALPHA-FEDEX)
+
+[Phase 4] Time Travel Inspection: Historical Snapshots in SQLite Checkpointer...
+  Retrieved 6 checkpoint snapshot(s) for Thread Alpha:
+  Checkpoint 1: (Completed) | Manager Approval: True | Dispatched: True
+  Checkpoint 2: ('execute_fulfillment',) | Manager Approval: True
+  Checkpoint 3: ('execute_fulfillment',) | Manager Approval: False (Paused state)
+  ...
+
+[Phase 5] Verifying Cross-Session Disk Persistence...
+  Reloaded Order Alpha from fresh SQLite connection successfully!
+======================================================================
+  [SUCCESS] SQLite checkpointing, human-in-the-loop gates, and time travel verified!
+======================================================================
+```
+
+---
+
+## 6. Optional: Spin Up Local Neo4j Container
 
 If you have Docker Desktop installed and want to view the knowledge graph visually in the Neo4j Browser:
 
